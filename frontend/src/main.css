@@ -1,0 +1,229 @@
+/* frontend/src/main.css */
+
+/* :root や body で、アプリ全体のフォントや背景色を定義します */
+:root {
+    /* 1. フォント */
+    --font-family-sans: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+    /* 2. 色 (背景) */
+    --color-background: #f4f7fa;
+    /* 明るい青みがかったグレー */
+    --color-surface-1: #ffffff;
+    /* カード、ナビゲーションバー (白) */
+    --color-surface-2: #f0f3f6;
+    /* 内部 (例: アブストラクト) */
+    --color-surface-3: #e9edf1;
+    /* デフォルトボタン */
+
+    /* 3. 色 (テキスト) */
+    --color-text-primary: #333333;
+    --color-text-strong: #000000;
+    --color-text-strong-hover: #111111;
+    --color-text-subtle: #555555;
+    --color-text-muted: #777777;
+    --color-text-on-surface-2: #333333;
+
+    /* 4. 色 (ボーダー) */
+    --color-border-1: #dde3e9;
+    --color-border-2: #e9edf1;
+    --color-border-3: #cdd5de;
+
+    /* 5. 色 (アクセント) */
+    --color-accent: #007aff;
+    /* 標準的な青 */
+    --color-accent-hover: #0056b3;
+    /* 少し濃い青 */
+    --color-danger: #dc3545;
+    --color-success: #28a745;
+
+    /* 6. レイアウト */
+    --border-radius-input: 4px;
+    --border-radius-button: 8px;
+    --border-radius-card-1: 8px;
+    /* フォームカード */
+    --border-radius-card-2: 12px;
+    /* 論文カード */
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+    /* --- ここから元の :root スタイル --- */
+    font-family: var(--font-family-sans);
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    /* デフォルトをダークテーマにします */
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* CSSリセットと基本的なレイアウト */
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+}
+
+/* アプリ全体のコンテナ設定 */
+#root {
+    padding: 2rem;
+}
+
+/* --- 共通コンポーネントのスタイル --- */
+
+h1 {
+    font-size: 2.2em;
+    line-height: 1.1;
+}
+
+/* リンクの共通スタイル */
+a {
+    font-weight: 500;
+    color: var(--color-accent);
+    text-decoration: inherit;
+}
+
+a:hover {
+    color: var(--color-accent-hover);
+}
+
+/* フォーム入力欄の共通スタイル */
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border-1);
+    border-radius: var(--border-radius-input);
+    box-sizing: border-box;
+    /* paddingを含めてwidth 100%にするため */
+    background-color: var(--color-background);
+    color: var(--color-text-strong);
+}
+
+/* フォームページのコンテナ */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+    padding-top: 50px;
+    text-align: center;
+}
+
+.paper-card {
+    background-color: var(--color-surface-1);
+    border-radius: var(--border-radius-card-2);
+    padding: 2rem;
+    max-width: 800px;
+    /* 論文が読みやすいよう最大幅を設定 */
+    margin: 2rem auto;
+    /* 上部ナビゲーションバーからのマージン */
+    box-shadow: var(--shadow-card);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* 要素間のスペース */
+}
+
+.paper-card .conference {
+    font-style: italic;
+    color: var(--color-text-subtle);
+    margin: 0;
+}
+
+.paper-card h3 {
+    margin: 0;
+    line-height: 1.3;
+}
+
+.paper-card .authors {
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.paper-card .abstract {
+    background-color: var(--color-surface-2);
+    border-radius: var(--border-radius-button);
+    /* 8px */
+    padding: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-on-surface-2);
+}
+
+.paper-card details {
+    margin-top: 0.5rem;
+}
+
+.paper-card details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--color-text-subtle);
+}
+
+.paper-card a:hover {
+    text-decoration: underline;
+}
+
+/* --- Card Action Buttons --- */
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.card-actions .btn {
+    flex: 1;
+}
+
+/* --- State Messages --- */
+.all-done-message,
+.error-message {
+    background-color: var(--color-surface-1);
+    border-radius: var(--border-radius-card-2);
+    padding: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.all-done-message h2 {
+    color: var(--color-success);
+    /* Green */
+}
+
+.error-message h2 {
+    color: var(--color-danger);
+    /* Red */
+}
+
+.liked-papers-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+    /* ページタイトルは左揃えに */
+}
+
+.liked-papers-container h1 {
+    margin-bottom: 1.5rem;
+}
+
+.paper-title-container {
+    display: flex;
+    justify-content: space-between;
+    /* Title on left, star on right */
+    align-items: center;
+    /* Vertically center */
+    gap: 1rem;
+}
+
+.paper-title-container h3 {
+    flex-grow: 1;
+    /* Title takes up available space */
+}

@@ -1,0 +1,73 @@
+/* frontend/src/components/Button.css */
+
+/* 1. ベーススタイル */
+.btn {
+    border-radius: var(--border-radius-button);
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    /* アニメーションを滑らかに */
+    transition: border-color 0.25s, background-color 0.25s, opacity 0.25s;
+}
+
+/* 2. サイズ */
+.btn-small {
+    /* ログアウトボタンで使用 */
+    font-size: 0.9em;
+}
+
+.btn-medium {
+    /* 標準サイズ (今回は未使用) */
+    font-size: 1em;
+}
+
+.btn-large {
+    /* フォームとReadボタンで使用 */
+    font-size: 1.1em;
+}
+
+/* 3. 全幅オプション */
+.btn-full-width {
+    width: 100%;
+}
+
+/* 4. 外観 (Variants) */
+
+/* Default */
+.btn-default {
+    background-color: var(--color-border-2);
+    border-color: var(--color-border-2);
+    color: var(--color-text-subtle);
+}
+
+.btn-default:not(:disabled):hover {
+    background-color: var(--color-border-1);
+    border-color: var(--color-border-3);
+    color: var(--color-text-strong);
+}
+
+/* Primary */
+.btn-primary {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.btn-primary:not(:disabled):hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+}
+
+/* 5. 状態 (Focus, Disabled) */
+.btn:focus,
+.btn:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

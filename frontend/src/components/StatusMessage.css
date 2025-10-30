@@ -1,0 +1,28 @@
+/* frontend/src/components/StatusMessage.css */
+
+/* メッセージの共通スタイル */
+.status-message {
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-input);
+    border: 1px solid transparent;
+    text-align: left;
+}
+
+/* 成功メッセージ (main.css の --color-success を利用) */
+.status-message-success {
+    color: var(--color-success);
+    background-color: #d4edda;
+    /* 薄い緑 */
+    border-color: #c3e6cb;
+}
+
+/* エラーメッセージ (main.css の --color-danger を利用) */
+.status-message-error {
+    color: var(--color-danger);
+    background-color: #f8d7da;
+    /* 薄い赤 */
+    border-color: #f5c6cb;
+}

@@ -1,0 +1,24 @@
+/* frontend/src/components/Form.css */
+
+/* フォームを囲うカード */
+.form-card {
+    padding: 2em;
+    border-radius: var(--border-radius-card-1);
+    background-color: var(--color-surface-1);
+    width: 100%;
+    margin-bottom: 20px;
+    /* フォーム内のラベルは左揃えを基本とする */
+    text-align: left;
+}
+
+/* ラベルと入力のグループ */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
