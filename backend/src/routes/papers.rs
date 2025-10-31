@@ -31,8 +31,8 @@ pub fn create_paper_routes() -> Router<AppState> {
             description = "学会と年度のユニークな組み合わせリスト",
             body = Vec<Conference>,
             example = json!([
-                {"conference_name": "USENIX Security", "year": 2025},
-                {"conference_name": "USENIX Security", "year": 2024}
+                {"name": "USENIX Security", "year": 2025},
+                {"name": "USENIX Security", "year": 2024}
             ])
         ),
         (status = 500, description = "サーバーエラー")

@@ -1,5 +1,4 @@
 // src/routes/swagger.rs
-use axum::Router;
 use utoipa::{
     Modify, OpenApi,
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
@@ -7,12 +6,9 @@ use utoipa::{
 use utoipa_swagger_ui::SwaggerUi;
 
 // models.rs から ToSchema を実装した型をすべてインポートする
-use crate::{
-    models::{
-        AuthToken, Conference, CrawlPayload, CrawlResponse, LoginPayload, Paper, PaperStatus,
-        RegisterPayload, StatusPayload, User,
-    },
-    state::AppState,
+use crate::models::{
+    AuthToken, Conference, CrawlPayload, CrawlResponse, LoginPayload, Paper, PaperStatus,
+    RegisterPayload, StatusPayload, User,
 };
 
 // --- APIドキュメントの定義 ---
@@ -64,8 +60,6 @@ impl Modify for SecurityAddon {
 
 /// Swagger UI をホストするルーターを返します。
 /// ( /api-docs にUI、 /api-docs/openapi.json に仕様JSON)
-pub fn create_swagger_routes() -> Router<AppState> {
-    SwaggerUi::new("/api-docs")
-        .url("/api-docs/openapi.json", ApiDoc::openapi())
-        .into()
+pub fn create_swagger_routes() -> SwaggerUi {
+    SwaggerUi::new("/api-docs").url("/api-docs/openapi.json", ApiDoc::openapi())
 }

@@ -24,7 +24,7 @@ pub fn create_router(app_state: AppState, static_dir: String) -> Router {
     // ServeFile サービスはリクエストごとにパスを clone する必要があるため、
     // ここで clone しておきます。
     let index_html_service = ServeFile::new(index_html_path);
-    
+
     let static_files_service = ServeDir::new(static_dir)
         // 該当ファイルが見つからない場合 (例: /liked への直接アクセス)
         // index.html を返すようにフォールバックさせます (SPA対応)
