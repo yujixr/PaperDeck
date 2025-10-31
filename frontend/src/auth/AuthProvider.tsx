@@ -3,7 +3,6 @@ import { createContext, useContext, useState, useEffect, type ReactNode, useCall
 import {
     AuthApi,
     type LoginPayload,
-    type AuthToken,
     type RegisterPayload,
     type User,
     ResponseError
@@ -36,36 +35,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // JWTをlocalStorageに保存し、認証状態を更新するヘルパー
-    const saveAuthData = (token: AuthToken, userInfo: User) => {
-        localStorage.setItem(JWT_STORAGE_KEY, token.token);
-        setIsAuthenticated(true);
-        setUser(userInfo);
-    };
-
-    // ログアウト処理
+    // ログアウト処理 (login と useEffect より先に定義)
+    // 依存関係がないため、useCallback でメモ化
     const logout = useCallback(() => {
         localStorage.removeItem(JWT_STORAGE_KEY);
         setIsAuthenticated(false);
         setUser(null);
-        // ログアウト時にトップページ/ログインページにリダイレクトしたい場合は、
-        // useAuthを使うコンポーネント側で <Navigate to="/login" /> を実行します。
     }, []);
 
     // ログインAPI呼び出し
     const login = useCallback(async (payload: LoginPayload) => {
         try {
-            // uthApiのメソッドを直接呼び出し
-            const { token, tokenType } = await authApi.login({ loginPayload: payload });
+            // 1. ログインしてトークンを取得
+            const tokenData = await authApi.login({ loginPayload: payload });
 
-            // TODO: ユーザー情報取得ロジック
-            // 現状、/login はトークンのみを返し、ユーザー情報を返さない。
-            // 本来は /api/me のようなエンドポイントを叩くか、JWTをデコードすべき。
-            // ここではダミーデータを使用する。
-            const dummyUser: User = { userId: 1, username: payload.username };
-            saveAuthData({ token, tokenType }, dummyUser);
+            // 2. ユーザー情報を取得する前にトークンを保存
+            //    (getMe がこのトークンを使うため)
+            localStorage.setItem(JWT_STORAGE_KEY, tokenData.token);
+
+            // 3. /api/me を叩いて実際のユーザー情報を取得
+            const userInfo = await authApi.getMe();
+
+            // 4. 状態を更新
+            setIsAuthenticated(true);
+            setUser(userInfo);
 
         } catch (error) {
+            // エラーが発生したら、保存したかもしれないトークンを削除
+            logout();
+
             // Generatorクライアントのエラーハンドリング
             if (error instanceof ResponseError && error.response.status === 401) {
                 // 認証失敗（ユーザー名/パスワード違い）
@@ -82,19 +80,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // アプリケーション起動時にトークンをチェック
-    // 既にConfigurationにaccessToken関数を渡しているため、
-    // 認証が必要なAPIコールの失敗はResponseErrorとして処理されるべき
     useEffect(() => {
-        const token = localStorage.getItem(JWT_STORAGE_KEY);
-        if (token) {
-            // 本来はトークンをデコードしてユーザーIDを取得
-            // ここではダミーデータ（デコード仮定）
-            const dummyUser: User = { userId: 1, username: 'ログインユーザー' };
-            setIsAuthenticated(true);
-            setUser(dummyUser);
-        }
-        setIsLoading(false);
-    }, []);
+        // 非同期の認証チェック関数を定義
+        const checkAuthStatus = async () => {
+            const token = localStorage.getItem(JWT_STORAGE_KEY);
+            if (token) {
+                try {
+                    // トークンを使って /api/me を呼び出し、ユーザー情報を取得
+                    const userInfo = await authApi.getMe();
+                    // 成功： 認証状態を設定
+                    setIsAuthenticated(true);
+                    setUser(userInfo);
+                } catch (error) {
+                    // 失敗 (トークン切れなど)： ログアウト処理
+                    console.warn("Invalid token found, logging out.", error);
+                    logout();
+                }
+            }
+            // トークンの有無に関わらず、ロード完了
+            setIsLoading(false);
+        };
+
+        checkAuthStatus();
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, user, login, register, logout, isLoading }}>
