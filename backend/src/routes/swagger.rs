@@ -17,8 +17,9 @@ use crate::models::{
 #[openapi(
     paths(
         crate::routes::admin::trigger_crawl,
-        crate::routes::auth::register,
+        crate::routes::auth::get_me,
         crate::routes::auth::login,
+        crate::routes::auth::register,
         crate::routes::papers::get_conferences,
         crate::routes::papers::get_liked_papers,
         crate::routes::papers::get_next_paper,

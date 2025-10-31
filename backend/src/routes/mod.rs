@@ -43,7 +43,12 @@ pub fn create_router(app_state: AppState, static_dir: String) -> Router {
 /// 全APIルート（/auth, /papers, /admin）を結合したルーターを構築
 fn create_api_router(app_state: AppState) -> Router<AppState> {
     // 認証が不要なルート (ログイン/登録)
-    let auth_routes = auth::create_auth_routes();
+    let public_auth_routes = auth::create_public_auth_routes();
+
+    // 認証が必要な /auth/me ルート
+    let protected_auth_routes = auth::create_protected_auth_routes().layer(
+        middleware::from_fn_with_state(app_state.clone(), auth_middleware),
+    );
 
     // 認証が必要なルート (PaperDeck機能)
     let paper_routes = papers::create_paper_routes().layer(middleware::from_fn_with_state(
@@ -59,7 +64,8 @@ fn create_api_router(app_state: AppState) -> Router<AppState> {
 
     // 全てのAPIルートをマージ
     Router::new()
-        .merge(auth_routes)
+        .merge(public_auth_routes)
+        .merge(protected_auth_routes)
         .merge(paper_routes)
         .merge(admin_routes)
 }
