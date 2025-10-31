@@ -78,3 +78,10 @@ pub struct CrawlPayload {
 pub struct CrawlResponse {
     pub message: String,
 }
+
+// 論文取得 (GET /papers/next) のクエリパラメータ
+#[derive(Debug, Deserialize)]
+pub struct NextPaperParams {
+    pub conference: Option<String>,
+    pub year: Option<i64>,
+}

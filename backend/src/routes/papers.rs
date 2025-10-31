@@ -1,14 +1,15 @@
 // src/routes/papers.rs
 use crate::auth::AuthUser;
-use crate::models::{Conference, Paper, PaperStatus, StatusPayload};
+use crate::models::{Conference, NextPaperParams, Paper, PaperStatus, StatusPayload};
 use crate::state::AppState;
 use axum::{
     Extension, Json, Router,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     routing::{get, post},
 };
 use chrono::Utc;
+use sqlx::{QueryBuilder, Sqlite};
 use tracing;
 
 /// 論文APIルート (/papers/...) を構築します
@@ -131,6 +132,10 @@ async fn get_liked_papers(
     get,
     path = "/api/papers/next",
     tag = "Papers",
+    params(
+        ("conference" = Option<String>, Query, description = "学会名", example = "USENIX Security"),
+        ("year" = Option<i64>, Query, description = "年度", example = 2025)
+    ),
     responses(
         (
             status = 200,
@@ -159,30 +164,51 @@ async fn get_liked_papers(
 async fn get_next_paper(
     State(state): State<AppState>,
     Extension(auth_user): Extension<AuthUser>,
+    Query(params): Query<NextPaperParams>,
 ) -> Result<Json<Paper>, (StatusCode, String)> {
     let current_user_id = auth_user.user_id;
 
-    let result = sqlx::query_as::<_, Paper>(
+    // QueryBuilder を使って動的にクエリを構築
+    let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new(
         r#"
         SELECT p.*
         FROM papers p
         LEFT JOIN user_paper_status ups 
-            ON p.id = ups.paper_id AND ups.user_id = ?
-        WHERE ups.created_at IS NULL
-        ORDER BY RANDOM()
-        LIMIT 1
+            ON p.id = ups.paper_id AND ups.user_id = 
         "#,
-    )
-    .bind(current_user_id)
-    .fetch_optional(&state.db_pool)
-    .await;
+    );
+    query_builder.push_bind(current_user_id);
+
+    // 残りの WHERE 句を追加
+    query_builder.push(" WHERE ups.created_at IS NULL ");
+
+    // conference パラメータが存在し、空文字列でない場合
+    if let Some(conf_name) = &params.conference {
+        if !conf_name.is_empty() {
+            query_builder.push(" AND p.conference_name = ");
+            query_builder.push_bind(conf_name);
+        }
+    }
+
+    // year パラメータが存在する場合
+    if let Some(year) = params.year {
+        query_builder.push(" AND p.year = ");
+        query_builder.push_bind(year);
+    }
+
+    // 最後にランダムソートとリミットを追加
+    query_builder.push(" ORDER BY RANDOM() LIMIT 1");
+
+    let result = query_builder
+        .build_query_as::<Paper>()
+        .fetch_optional(&state.db_pool)
+        .await;
 
     match result {
+        // --- 成功ケース ---
         Ok(Some(paper)) => Ok(Json(paper)),
-        Ok(None) => {
-            tracing::info!("No unrated papers found for user {}", current_user_id);
-            Err((StatusCode::NOT_FOUND, "No unrated papers found".to_string()))
-        }
+
+        // --- 失敗ケース (DBエラー) ---
         Err(e) => {
             tracing::error!(
                 "Database error in get_next_paper for user {}: {}",
@@ -193,6 +219,58 @@ async fn get_next_paper(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Database error: {}", e),
             ))
+        }
+
+        // --- 見つからないケース (404) ---
+        Ok(None) => {
+            // フィルタに一致する論文がそもそも存在するかを確認する
+            let mut check_query: QueryBuilder<Sqlite> =
+                QueryBuilder::new("SELECT 1 FROM papers WHERE 1=1 ");
+
+            if let Some(conf_name) = &params.conference {
+                if !conf_name.is_empty() {
+                    check_query.push(" AND conference_name = ");
+                    check_query.push_bind(conf_name);
+                }
+            }
+            if let Some(year) = params.year {
+                check_query.push(" AND year = ");
+                check_query.push_bind(year);
+            }
+            check_query.push(" LIMIT 1");
+
+            let check_result = check_query.build().fetch_optional(&state.db_pool).await;
+
+            match check_result {
+                Ok(Some(_)) => {
+                    // ケースA: 論文は存在するが、すべて評価済み
+                    tracing::info!(
+                        "No unrated papers found for user {} (all rated for filters: {:?})",
+                        current_user_id,
+                        params
+                    );
+                    Err((
+                        StatusCode::NOT_FOUND,
+                        "All papers matching these filters have been rated.".to_string(),
+                    ))
+                }
+                Ok(None) => {
+                    // ケースB: フィルタに合う論文が1件も存在しない
+                    tracing::info!("No papers found at all for filters: {:?}", params);
+                    Err((
+                        StatusCode::NOT_FOUND,
+                        "No papers found matching the specified filters.".to_string(),
+                    ))
+                }
+                Err(e) => {
+                    // 追加クエリ自体がエラー
+                    tracing::error!("Database error (check query) in get_next_paper: {}", e);
+                    Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Database check error: {}", e),
+                    ))
+                }
+            }
         }
     }
 }
