@@ -9,8 +9,8 @@ use utoipa_swagger_ui::SwaggerUi;
 // models.rs から ToSchema を実装した型をすべてインポートする
 use crate::{
     models::{
-        AuthToken, CrawlPayload, CrawlResponse, LoginPayload, Paper, PaperStatus, RegisterPayload,
-        StatusPayload, User,
+        AuthToken, Conference, CrawlPayload, CrawlResponse, LoginPayload, Paper, PaperStatus,
+        RegisterPayload, StatusPayload, User,
     },
     state::AppState,
 };
@@ -23,15 +23,16 @@ use crate::{
         crate::routes::admin::trigger_crawl,
         crate::routes::auth::register,
         crate::routes::auth::login,
+        crate::routes::papers::get_conferences,
+        crate::routes::papers::get_liked_papers,
         crate::routes::papers::get_next_paper,
         crate::routes::papers::set_paper_status,
-        crate::routes::papers::get_liked_papers
     ),
     components(
         schemas(
             // src/models.rs で ToSchema を derive した型
             Paper, User, RegisterPayload, LoginPayload, AuthToken,
-            StatusPayload, CrawlPayload, PaperStatus, CrawlResponse
+            StatusPayload, CrawlPayload, PaperStatus, CrawlResponse, Conference
         )
     ),
     tags(

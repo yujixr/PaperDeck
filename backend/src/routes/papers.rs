@@ -1,6 +1,6 @@
 // src/routes/papers.rs
 use crate::auth::AuthUser;
-use crate::models::{Paper, PaperStatus, StatusPayload};
+use crate::models::{Conference, Paper, PaperStatus, StatusPayload};
 use crate::state::AppState;
 use axum::{
     Extension, Json, Router,
@@ -14,9 +14,116 @@ use tracing;
 /// 論文APIルート (/papers/...) を構築します
 pub fn create_paper_routes() -> Router<AppState> {
     Router::new()
-        .route("/papers/next", get(get_next_paper))
+        .route("/papers/conferences", get(get_conferences))
         .route("/papers/liked", get(get_liked_papers))
+        .route("/papers/next", get(get_next_paper))
         .route("/papers/:paper_id/status", post(set_paper_status))
+}
+
+/// 登録されている学会名と年度のリストを取得 (GET /papers/conferences)
+#[utoipa::path(
+    get,
+    path = "/api/papers/conferences",
+    tag = "Papers",
+    responses(
+        (
+            status = 200,
+            description = "学会と年度のユニークな組み合わせリスト",
+            body = Vec<Conference>,
+            example = json!([
+                {"conference_name": "USENIX Security", "year": 2025},
+                {"conference_name": "USENIX Security", "year": 2024}
+            ])
+        ),
+        (status = 500, description = "サーバーエラー")
+    ),
+    security(("bearer_auth" = [])) // 認証が必要
+)]
+async fn get_conferences(
+    State(state): State<AppState>,
+    Extension(_auth_user): Extension<AuthUser>,
+) -> Result<Json<Vec<Conference>>, (StatusCode, String)> {
+    let result = sqlx::query_as::<_, Conference>(
+        r#"
+        SELECT DISTINCT
+            conference_name AS name,
+            year
+        FROM papers
+        ORDER BY year DESC, name ASC
+        "#,
+    )
+    .fetch_all(&state.db_pool)
+    .await;
+
+    match result {
+        Ok(metadata) => Ok(Json(metadata)),
+        Err(e) => {
+            tracing::error!("Database error in get_conferences: {}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database error: {}", e),
+            ))
+        }
+    }
+}
+
+/// いいねした論文のリストを取得 (GET /papers/liked)
+#[utoipa::path(
+    get,
+    path = "/api/papers/liked",
+    tag = "Papers",
+    responses(
+        (
+            status = 200,
+            description = "いいねした論文のリストを取得",
+            body = Vec<Paper>,
+            example = json!([{
+                "id": 123,
+                "conference_name": "ICLR",
+                "year": 2024,
+                "title": "A paper about models",
+                "url": "http://example.com",
+                "authors": "A. Author, B. Author",
+                "abstract_text": "This abstract is about..."
+            }])
+        ),
+        (status = 500, description = "サーバーエラー")
+    ),
+    security(("bearer_auth" = []))
+)]
+async fn get_liked_papers(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+) -> Result<Json<Vec<Paper>>, (StatusCode, String)> {
+    let current_user_id = auth_user.user_id;
+
+    let result = sqlx::query_as::<_, Paper>(
+        r#"
+        SELECT p.*
+        FROM papers p
+        JOIN user_paper_status ups ON p.id = ups.paper_id
+        WHERE ups.user_id = ? AND ups.liked_at IS NOT NULL
+        ORDER BY ups.liked_at DESC
+        "#,
+    )
+    .bind(current_user_id)
+    .fetch_all(&state.db_pool)
+    .await;
+
+    match result {
+        Ok(papers) => Ok(Json(papers)),
+        Err(e) => {
+            tracing::error!(
+                "Database error in get_liked_papers for user {}: {}",
+                current_user_id,
+                e
+            );
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database error: {}", e),
+            ))
+        }
+    }
 }
 
 /// 次に評価すべき論文をランダムに1件取得 (GET /papers/next)
@@ -165,65 +272,6 @@ async fn set_paper_status(
         Err(e) => {
             tracing::error!(
                 "Database error in set_paper_status for user {}: {}",
-                current_user_id,
-                e
-            );
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Database error: {}", e),
-            ))
-        }
-    }
-}
-
-/// いいねした論文のリストを取得 (GET /papers/liked)
-#[utoipa::path(
-    get,
-    path = "/api/papers/liked",
-    tag = "Papers",
-    responses(
-        (
-            status = 200,
-            description = "いいねした論文のリストを取得",
-            body = Vec<Paper>,
-            example = json!([{
-                "id": 123,
-                "conference_name": "ICLR",
-                "year": 2024,
-                "title": "A paper about models",
-                "url": "http://example.com",
-                "authors": "A. Author, B. Author",
-                "abstract_text": "This abstract is about..."
-            }])
-        ),
-        (status = 500, description = "サーバーエラー")
-    ),
-    security(("bearer_auth" = []))
-)]
-async fn get_liked_papers(
-    State(state): State<AppState>,
-    Extension(auth_user): Extension<AuthUser>,
-) -> Result<Json<Vec<Paper>>, (StatusCode, String)> {
-    let current_user_id = auth_user.user_id;
-
-    let result = sqlx::query_as::<_, Paper>(
-        r#"
-        SELECT p.*
-        FROM papers p
-        JOIN user_paper_status ups ON p.id = ups.paper_id
-        WHERE ups.user_id = ? AND ups.liked_at IS NOT NULL
-        ORDER BY ups.liked_at DESC
-        "#,
-    )
-    .bind(current_user_id)
-    .fetch_all(&state.db_pool)
-    .await;
-
-    match result {
-        Ok(papers) => Ok(Json(papers)),
-        Err(e) => {
-            tracing::error!(
-                "Database error in get_liked_papers for user {}: {}",
                 current_user_id,
                 e
             );

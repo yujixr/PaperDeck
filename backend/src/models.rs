@@ -23,6 +23,13 @@ pub struct Paper {
     pub abstract_text: Option<String>,
 }
 
+// フィルター用の学会・年度リスト
+#[derive(Debug, Serialize, sqlx::FromRow, ToSchema)]
+pub struct Conference {
+    pub name: String,
+    pub year: i64,
+}
+
 // 3. POSTリクエスト用のペイロード
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct StatusPayload {
