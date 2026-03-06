@@ -1,0 +1,49 @@
+:root {
+  /* Typography */
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Source Serif 4", "Georgia", serif;
+
+  /* Colors - Background */
+  --color-bg: #f5f0e8;
+  --color-card: #fffefa;
+
+  /* Colors - Text */
+  --color-text: #1a1714;
+  --color-text-secondary: #5c554b;
+  --color-text-muted: #9a9185;
+
+  /* Colors - Accent */
+  --color-accent: #2d5f4a;
+  --color-accent-hover: #1f4435;
+  --color-star: #b8860b;
+  --color-star-hover: #d4a017;
+
+  /* Colors - Status */
+  --color-success: #2d6a4f;
+  --color-error: #8b2020;
+
+  /* Colors - Border & Surface */
+  --color-border: #d6cebe;
+  --color-navbar: #f5f0e8;
+  --color-backdrop: rgba(26, 23, 20, 0.3);
+
+  /* Layout */
+  --radius: 6px;
+  --shadow-card: 0 2px 8px rgba(26, 23, 20, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(26, 23, 20, 0.14);
+  --shadow-navbar: 0 1px 4px rgba(26, 23, 20, 0.06);
+
+  /* Noise texture (inline SVG) */
+  --texture-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+  /* Duration */
+  --duration-fast: 0.4s;
+  --duration-base: 0.55s;
+  --duration-slow: 0.75s;
+  --easing-gentle: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Transition (shorthand) */
+  --transition-fast: var(--duration-fast) ease;
+  --transition-base: var(--duration-base) ease;
+  --transition-slow: var(--duration-slow) var(--easing-gentle);
+}

@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "scripts": {
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "publish:cf": "pnpm --filter frontend build && pnpm --filter backend exec wrangler deploy",
+    "crawl": "pnpm --filter crawler crawl",
+    "migrate": "pnpm --filter backend exec wrangler d1 migrations apply paperdeck-db --local",
+    "migrate:remote": "pnpm --filter backend exec wrangler d1 migrations apply paperdeck-db --remote",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd",
+      "sharp"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6"
+  }
+}

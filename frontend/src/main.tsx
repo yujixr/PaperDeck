@@ -1,21 +1,37 @@
 // src/main.tsx
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
 
-import './main.css';
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 
-import App from './App.tsx';
+import "./styles/tokens.css";
+import "./styles/animations.css";
+import "./main.css";
 
-const queryClient = new QueryClient(); // QueryClientをインスタンス化
+import App from "./App.tsx";
 
-createRoot(document.getElementById('root')!).render(
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24h
+    },
+  },
+});
+
+const persister = createAsyncStoragePersister({
+  storage: window.localStorage,
+});
+
+// biome-ignore lint/style/noNonNullAssertion: root element always exists in index.html
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>
+    </PersistQueryClientProvider>
+  </StrictMode>,
 );

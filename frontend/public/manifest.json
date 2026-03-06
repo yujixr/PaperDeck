@@ -1,0 +1,11 @@
+{
+  "name": "PaperDeck",
+  "short_name": "PaperDeck",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#f5f0e8",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

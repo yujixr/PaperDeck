@@ -1,0 +1,22 @@
+name = "paperdeck"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+workers_dev = false
+
+[assets]
+directory = "../frontend/dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+
+
+[[routes]]
+pattern = "paperdeck.yuji.ne.jp"
+custom_domain = true
+
+# JWT_SECRET must be set via `wrangler secret put JWT_SECRET`
+# Do NOT put it in [vars] — secrets should never be in version control.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "paperdeck-db"
+database_id = "2f3ff8a4-3a6c-447a-89b2-2afa1edcb2cf"

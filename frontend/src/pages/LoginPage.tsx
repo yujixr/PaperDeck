@@ -1,64 +1,83 @@
-// frontend/src/pages/LoginPage.tsx
-import { useState, useCallback, useMemo } from 'react';
-import { useAuth } from '../auth/AuthProvider';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthForm } from '../components/AuthForm';
+import { useCallback, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../auth/AuthProvider";
+import { Button } from "../components/Button";
+import "../components/AuthForm.css";
 
-/**
- * ログインページコンポーネント
- * フォームでユーザー名とパスワードを受け取り、認証ロジックを実行します。
- */
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isFormValid = useMemo(() => {
-    return username.trim() !== '' && password.trim() !== '';
+    return username.trim() !== "" && password.trim() !== "";
   }, [username, password]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  const handleSubmit = useCallback(
+    async (e: React.SubmitEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setError(null);
+      setIsSubmitting(true);
 
-    try {
-      await login({ username, password });
-      // ログイン成功したら、HomePage (/) へリダイレクト
-      navigate('/', { replace: true });
-    } catch (err) {
-      console.error("Login Error:", err);
-      // AuthProvider で定義された特定のエラーメッセージを取得
-      const errorMessage = err instanceof Error ? err.message : "ログイン中に不明なエラーが発生しました。";
-      setError(errorMessage);
-      setIsSubmitting(false);
-    }
-  }, [login, username, password, navigate]);
+      try {
+        await login(username, password);
+        navigate("/", { replace: true });
+      } catch (err) {
+        console.error("Login Error:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "ログイン中に不明なエラーが発生しました。";
+        setError(errorMessage);
+        setIsSubmitting(false);
+      }
+    },
+    [login, username, password, navigate],
+  );
 
   return (
-    < div className="form-container" >
+    <div className="form-container">
       <h1>ログイン</h1>
 
-      <AuthForm
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-        isSubmitting={isSubmitting}
-        isFormValid={isFormValid}
-        errorMessage={error}
-        submitButtonText="ログイン"
-        submitButtonLoadingText="ログイン中..."
-        onSubmit={handleSubmit}
-      />
+      <div className="form-card">
+        <form onSubmit={handleSubmit}>
+          {error && <p className="status-message status-message-error">{error}</p>}
+
+          <div className="form-group">
+            <label htmlFor="username">ユーザー名:</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">パスワード:</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <Button type="submit" size="large" fullWidth disabled={isSubmitting || !isFormValid}>
+            {isSubmitting ? "ログイン中..." : "ログイン"}
+          </Button>
+        </form>
+      </div>
 
       <p>
         アカウントをお持ちでないですか？ <Link to="/register">登録はこちら</Link>
       </p>
-    </div >
+    </div>
   );
 }

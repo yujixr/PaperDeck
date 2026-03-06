@@ -1,73 +1,67 @@
-/* frontend/src/components/Button.css */
-
-/* 1. ベーススタイル */
 .btn {
-    border-radius: var(--border-radius-button);
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    /* アニメーションを滑らかに */
-    transition: border-color 0.25s, background-color 0.25s, opacity 0.25s;
+  border-radius: var(--radius);
+  padding: 0.6em 1.4em;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-/* 2. サイズ */
+.btn:hover {
+  transform: scale(1.02);
+}
+
 .btn-small {
-    /* ログアウトボタンで使用 */
-    font-size: 0.9em;
+  font-size: 0.9em;
 }
-
 .btn-medium {
-    /* 標準サイズ (今回は未使用) */
-    font-size: 1em;
+  font-size: 1em;
 }
-
 .btn-large {
-    /* フォームとReadボタンで使用 */
-    font-size: 1.1em;
+  font-size: 1.05em;
 }
 
-/* 3. 全幅オプション */
 .btn-full-width {
-    width: 100%;
+  width: 100%;
 }
 
-/* 4. 外観 (Variants) */
-
-/* Default */
-.btn-default {
-    background-color: var(--color-border-2);
-    border-color: var(--color-border-2);
-    color: var(--color-text-subtle);
-}
-
-.btn-default:not(:disabled):hover {
-    background-color: var(--color-border-1);
-    border-color: var(--color-border-3);
-    color: var(--color-text-strong);
-}
-
-/* Primary */
 .btn-primary {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-    color: #ffffff;
-    font-weight: 500;
+  background-color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: #ffffff;
 }
 
 .btn-primary:not(:disabled):hover {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  box-shadow: 0 2px 8px rgba(139, 26, 26, 0.2);
 }
 
-/* 5. 状態 (Focus, Disabled) */
+.btn-default {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.btn-default:not(:disabled):hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
 .btn:focus,
 .btn:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }

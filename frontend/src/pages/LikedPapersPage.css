@@ -1,0 +1,46 @@
+.liked-papers-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.liked-papers-container h1 {
+  margin-bottom: 1.5rem;
+  font-family: var(--font-heading);
+}
+
+.my-masonry-grid {
+  display: flex;
+  margin-left: -1.25rem;
+  width: auto;
+}
+
+.my-masonry-grid_column {
+  padding-left: 1.25rem;
+  background-clip: padding-box;
+}
+
+.my-masonry-grid_column > .liked-paper-item {
+  margin-bottom: 1.25rem;
+}
+
+/* --- Mobile (≤640px) --- */
+@media (max-width: 640px) {
+  .liked-papers-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .my-masonry-grid {
+    margin-left: -0.75rem;
+  }
+
+  .my-masonry-grid_column {
+    padding-left: 0.75rem;
+  }
+
+  .my-masonry-grid_column > .liked-paper-item {
+    margin-bottom: 0.75rem;
+  }
+}

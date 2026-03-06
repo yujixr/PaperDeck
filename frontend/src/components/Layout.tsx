@@ -1,55 +1,99 @@
-// frontend/src/components/Layout.tsx
-import { Outlet, NavLink } from 'react-router-dom';
-import { useAuth } from '../auth/AuthProvider';
-import { Button } from './Button';
-import './Layout.css';
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { SettingsDialog } from "./SettingsDialog";
+import "./Layout.css";
 
-/**
- * 共有のナビゲーションバーを含むレイアウトコンポーネント。
- * 認証済みページ (Home, Liked, Admin) は、このレイアウト内に表示されます。
- */
+function useViewTransitionNavigate() {
+  const navigate = useNavigate();
+  return (to: string) => {
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => void };
+    if (!doc.startViewTransition) {
+      navigate(to);
+      return;
+    }
+    doc.startViewTransition(() => navigate(to));
+  };
+}
+
 export function Layout() {
-    const { logout } = useAuth();
+  const vtNavigate = useViewTransitionNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { key } = useLocation();
+  const prevKeyRef = useRef(key);
 
-    const handleLogout = () => {
-        logout();
+  // Close menu on route change
+  if (prevKeyRef.current !== key) {
+    prevKeyRef.current = key;
+    if (menuOpen) {
+      setMenuOpen(false);
+    }
+  }
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
     };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [menuOpen]);
 
-    return (
-        <div className="app-layout">
-            {/* --- ナビゲーションバー --- */}
-            <header className="navbar">
-                <div className="nav-brand">
-                    <NavLink to="/">PaperDeck</NavLink>
-                </div>
-
-                {/* --- ページリンク --- */}
-                <nav className="nav-links">
-                    {/* 'end' prop は、"/" に完全に一致する場合のみ active にします */}
-                    <NavLink to="/" end>
-                        ホーム
-                    </NavLink>
-                    <NavLink to="/liked">いいね一覧</NavLink>
-                    <NavLink to="/admin">管理</NavLink>
-                </nav>
-
-                {/* --- ログアウトボタン --- */}
-                <div className="nav-actions">
-                    <Button
-                        variant="default"
-                        size="small"
-                        onClick={handleLogout}
-                    >
-                        ログアウト
-                    </Button>
-                </div>
-            </header>
-
-            {/* --- ページコンテンツ --- */}
-            {/* 子ルート (HomePage, LikedPapersPage など) はここに表示されます */}
-            <main className="layout-content">
-                <Outlet />
-            </main>
+  return (
+    <div className="app-layout">
+      <header className="navbar" ref={menuRef}>
+        <div className="nav-brand">
+          <NavLink
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              vtNavigate("/");
+            }}
+          >
+            PaperDeck
+          </NavLink>
         </div>
-    );
+        <nav className={`nav-links${menuOpen ? " nav-links--open" : ""}`}>
+          <NavLink
+            to="/"
+            end
+            onClick={(e) => {
+              e.preventDefault();
+              vtNavigate("/");
+            }}
+          >
+            ホーム
+          </NavLink>
+          <NavLink
+            to="/liked"
+            onClick={(e) => {
+              e.preventDefault();
+              vtNavigate("/liked");
+            }}
+          >
+            いいね一覧
+          </NavLink>
+          <SettingsDialog trigger="設定" />
+        </nav>
+        <div className="nav-actions">
+          <SettingsDialog />
+        </div>
+        <button
+          type="button"
+          className="nav-hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="メニュー"
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      </header>
+      <main className="layout-content">
+        <Outlet />
+      </main>
+    </div>
+  );
 }

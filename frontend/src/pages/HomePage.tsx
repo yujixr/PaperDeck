@@ -1,172 +1,160 @@
-// frontend/src/pages/HomePage.tsx
-import { useState, useEffect } from 'react'; // ★ useState, useEffect をインポート
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
-} from '@tanstack/react-query';
-import {
-    PapersApi,
-    ResponseError,
-    PaperStatus,
-} from '../api';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { ApiError, api, type Paper } from "../api";
+import { Button } from "../components/Button";
+import { StarButton } from "../components/StarButton";
+import { useConferenceFilter } from "../context/ConferenceFilterContext";
+import "../components/Card.css";
+import "./HomePage.css";
 
-import { Button } from '../components/Button';
-import { StarButton } from '../components/StarButton';
-import { useApiClient } from '../hooks/useApiClient';
-
-/**
- * 論文を評価するためのメインページ。
- */
 export function HomePage() {
-    const queryClient = useQueryClient();
-    const papersApi = useApiClient(PapersApi);
+  const queryClient = useQueryClient();
+  const { filter } = useConferenceFilter();
+  const filterRef = useRef(filter);
+  filterRef.current = filter;
 
-    // 1. 現在の論文をいいねしたかどうかのローカル状態
-    const [isCurrentLiked, setIsCurrentLiked] = useState(false);
+  // フィルタ変更時、現在の論文がフィルタに合致していればリフェッチしない
+  useEffect(() => {
+    if (filter === null) return; // 「すべて」は常に合致
+    const current = queryClient.getQueryData<Paper>(["nextPaper"]);
+    if (
+      current &&
+      current.conference_name === filter.conference &&
+      String(current.year) === filter.year
+    )
+      return;
+    queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
+  }, [filter, queryClient]);
 
-    // --- 1. データ取得 (GET /api/papers/next) ---
-    const {
-        data: paper,
-        isLoading,
-        isError,
-        error,
-    } = useQuery({
-        queryKey: ['nextPaper'], // React Query のキャッシュキー
-        queryFn: () => papersApi.getNextPaper(),
-        refetchOnWindowFocus: false, // ウィンドウフォーカスで再フェッチしない
-        retry: (failureCount, error) => {
-            // 404 (Not Found) は「未評価の論文がない」という正常なレスポンスとして扱う
-            if (error instanceof ResponseError && error.response.status === 404) {
-                return false; // リトライしない
-            }
-            // その他のエラーは3回までリトライ
-            return failureCount < 3;
-        },
-    });
+  const {
+    data: paper,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["nextPaper"],
+    queryFn: () => {
+      const f = filterRef.current;
+      return api.getNextPaper(f ? { conference: f.conference, year: f.year } : undefined);
+    },
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && error.status === 404) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
 
-    // 2. 新しい論文が読み込まれたら、ローカルのいいね状態をリセット
-    useEffect(() => {
-        // paper が (再) 読み込みされたら、スターの状態をリセット
-        setIsCurrentLiked(false);
-    }, [paper?.id]); // paper.id が変わった時 (＝次の論文になった時) に実行
+  const likeMutation = useMutation({
+    mutationFn: (paperId: number) => api.likePaper(paperId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
+      queryClient.invalidateQueries({ queryKey: ["likedPapers"] });
+    },
+  });
 
-    // --- 3. データ更新 (POST /api/papers/:id/status) ---
-    const { mutate, isPending: isMutating } = useMutation({
-        mutationFn: (variables: { paperId: number; status: PaperStatus }) =>
-            papersApi.setPaperStatus({
-                paperId: variables.paperId,
-                statusPayload: { status: variables.status },
-            }),
+  const readMutation = useMutation({
+    mutationFn: (paperId: number) => api.readPaper(paperId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
+    },
+  });
 
-        onSuccess: (_data, variables) => {
-            if (variables.status === PaperStatus.Read) {
-                queryClient.invalidateQueries({ queryKey: ['nextPaper'] });
-            }
-            if (variables.status === PaperStatus.Liked) {
-                // いいねリストを裏側で更新
-                queryClient.invalidateQueries({ queryKey: ['likedPapers'] });
-            }
-        },
-        onError: (err, variables) => {
-            console.error('Failed to set paper status:', err);
-            if (variables.status === PaperStatus.Liked) {
-                setIsCurrentLiked(false);
-            }
-        },
-    });
+  const [exiting, setExiting] = useState(false);
+  const pendingAction = useRef<"like" | "read" | null>(null);
 
-    // --- 4. イベントハンドラ ---
-    const handleRate = (status: PaperStatus) => {
-        if (paper) {
-            mutate({ paperId: paper.id, status });
+  const isMutating = likeMutation.isPending || readMutation.isPending;
 
-            // 3. 'Liked' が押されたら、ローカル状態を true に設定
-            if (status === PaperStatus.Liked) {
-                setIsCurrentLiked(true);
-            }
-        }
-    };
+  const startExit = (action: "like" | "read") => {
+    if (!paper || exiting) return;
+    pendingAction.current = action;
+    setExiting(true);
+  };
 
-    // --- 5. 描画ロジック ---
-
-    // 4.1. ローディング状態
-    if (isLoading) {
-        return <div>次の論文を読み込み中...</div>;
+  const handleAnimationEnd = () => {
+    if (!exiting || !paper) return;
+    setExiting(false);
+    if (pendingAction.current === "like") {
+      likeMutation.mutate(paper.id);
+    } else {
+      readMutation.mutate(paper.id);
     }
+    pendingAction.current = null;
+  };
 
-    // 4.2. "すべて完了" 状態 (404 エラー)
-    if (error instanceof ResponseError && error.response.status === 404) {
-        return (
-            <div className="all-done-message">
-                <h2>🎉 すべて完了しました！</h2>
-                <p>評価可能な論文はすべて評価済みです。お疲れ様でした！</p>
-            </div>
-        );
-    }
+  const handleLike = () => startExit("like");
+  const handleRead = () => startExit("read");
 
-    // 4.3. 汎用エラー状態
-    if (isError) {
-        return (
-            <div className="error-message">
-                <h2>エラー</h2>
-                <p>論文の読み込みに失敗しました: {error.message}</p>
-            </div>
-        );
-    }
-
-    // 4.4. 成功状態 (論文データが利用可能)
-    if (!paper) {
-        // isError/isLoading でないのに paper がない場合 (念のため)
-        return <div>論文が見つかりません。</div>;
-    }
-
+  if (isLoading) {
     return (
-        <div className="paper-card">
-            {/* 論文情報 */}
-            <p className="conference">
-                {paper.conferenceName} {paper.year}
-            </p>
-
-            {/* --- タイトルとスターボタン --- */}
-            <div className="paper-title-container">
-                <h3>{paper.title}</h3>
-                <StarButton
-                    onClick={() => handleRate(PaperStatus.Liked)}
-                    disabled={isMutating || isCurrentLiked}
-                    isLiked={isCurrentLiked}
-                    title="いいね（興味あり）"
-                />
-            </div>
-
-            <details>
-                <summary>詳細（著者・リンク）</summary>
-                <p className="authors" style={{ marginTop: '0.5rem' }}>
-                    {paper.authors || '著者情報なし'}
-                </p>
-
-                {paper.url && (
-                    <a href={paper.url} target="_blank" rel="noopener noreferrer">
-                        論文を読む
-                    </a>
-                )}
-            </details>
-
-            <p className="abstract">
-                {paper.abstractText || 'アブストラクトはありません。'}
-            </p>
-
-            {/* --- アクションボタン --- */}
-            <div className="card-actions">
-                <Button
-                    variant="default"
-                    size="large"
-                    onClick={() => handleRate(PaperStatus.Read)}
-                    disabled={isMutating}
-                >
-                    {isMutating ? '...' : '次の論文を読む'}
-                </Button>
-            </div>
-        </div>
+      <div className="card paper-card paper-card-skeleton">
+        <div className="skeleton" style={{ width: "30%", height: "0.8rem" }} />
+        <div className="skeleton" style={{ width: "85%", height: "1.5rem" }} />
+        <div className="skeleton" style={{ width: "60%", height: "1.5rem" }} />
+        <div className="skeleton skeleton-abstract" />
+      </div>
     );
+  }
+
+  if (error instanceof ApiError && error.status === 404) {
+    return (
+      <div className="all-done-message">
+        <h2>すべて完了しました！</h2>
+        <p>評価可能な論文はすべて評価済みです。お疲れ様でした！</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="error-message">
+        <h2>エラー</h2>
+        <p>論文の読み込みに失敗しました: {error.message}</p>
+      </div>
+    );
+  }
+
+  if (!paper) {
+    return <div>論文が見つかりません。</div>;
+  }
+
+  return (
+    <div
+      className={`card paper-card${exiting ? " exiting" : ""}`}
+      key={paper.id}
+      onAnimationEnd={handleAnimationEnd}
+    >
+      <p className="conference">
+        {paper.conference_name} {paper.year}
+      </p>
+      <div className="paper-title-container">
+        <h3>{paper.title}</h3>
+        <StarButton
+          onClick={handleLike}
+          disabled={isMutating}
+          isLiked={false}
+          title="いいね（興味あり）"
+        />
+      </div>
+      <details>
+        <summary>詳細（著者・リンク）</summary>
+        <p className="authors" style={{ marginTop: "0.5rem" }}>
+          {paper.authors || "著者情報なし"}
+        </p>
+        {paper.url && (
+          <a href={paper.url} target="_blank" rel="noopener noreferrer">
+            論文を読む
+          </a>
+        )}
+      </details>
+      <p className="abstract">{paper.abstract_text || "アブストラクトはありません。"}</p>
+      <div className="card-actions">
+        <Button variant="default" size="large" onClick={handleRead} disabled={isMutating}>
+          {isMutating ? "..." : "次の論文を読む"}
+        </Button>
+      </div>
+    </div>
+  );
 }

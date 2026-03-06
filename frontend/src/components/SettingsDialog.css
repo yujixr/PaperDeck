@@ -1,0 +1,130 @@
+.settings-dialog {
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-card-hover);
+  color: var(--color-text);
+
+  opacity: 1;
+  transition:
+    opacity var(--duration-base) var(--easing-gentle),
+    overlay var(--duration-base) var(--easing-gentle) allow-discrete;
+}
+
+.settings-dialog:not([open]) {
+  opacity: 0;
+}
+
+@starting-style {
+  .settings-dialog[open] {
+    opacity: 0;
+  }
+}
+
+.settings-dialog::backdrop {
+  background-color: var(--color-backdrop);
+  opacity: 1;
+  transition:
+    opacity var(--duration-base) var(--easing-gentle),
+    overlay var(--duration-base) var(--easing-gentle) allow-discrete,
+    display var(--duration-base) var(--easing-gentle) allow-discrete;
+}
+
+.settings-dialog:not([open])::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  .settings-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.settings-dialog-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-dialog-header h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+}
+
+.settings-dialog-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 0.25rem;
+  transition: color var(--transition-fast);
+}
+
+.settings-dialog-close:hover {
+  color: var(--color-text);
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.settings-value {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.settings-select {
+  appearance: none;
+  padding: 0.5rem 2.5rem 0.5rem 0;
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235c554b' d='M1.4 0L6 4.6 10.6 0 12 1.4l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.25rem center;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: border-color var(--transition-base);
+}
+
+.settings-select:hover {
+  border-bottom-color: var(--color-text-secondary);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-bottom-color: var(--color-accent);
+}
+
+.settings-logout {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* --- Mobile (≤640px) --- */
+@media (max-width: 640px) {
+  .settings-dialog {
+    width: 95%;
+  }
+}

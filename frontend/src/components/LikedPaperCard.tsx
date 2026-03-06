@@ -1,32 +1,38 @@
-// frontend/src/components/LikedPaperCard.tsx
-import type { Paper } from '../api';
-import './LikedPaperCard.css';
+import { useQueryClient } from "@tanstack/react-query";
+import { api, type Paper } from "../api";
+import { StarButton } from "./StarButton";
+import "./Card.css";
+import "./LikedPaperCard.css";
 
-/**
- * いいねした論文カードコンポーネント (リスト内のアイテム)
- */
-export function LikedPaperCard({ paper }: { paper: Paper }) {
-    return (
-        <div className="liked-paper-item">
-            <p className="conference">
-                {paper.conferenceName} {paper.year}
-            </p>
-            <h3>{paper.title}</h3>
-            <p className="authors">{paper.authors || '著者情報なし'}</p>
+export function LikedPaperCard({ paper, style }: { paper: Paper; style?: React.CSSProperties }) {
+  const queryClient = useQueryClient();
 
-            {paper.url && (
-                <a href={paper.url} target="_blank" rel="noopener noreferrer">
-                    論文を読む
-                </a>
-            )}
-
-            {/* アブストラクトは詳細折りたたみで表示 */}
-            <details>
-                <summary>アブストラクト</summary>
-                <p className="abstract">
-                    {paper.abstractText || 'アブストラクトはありません。'}
-                </p>
-            </details>
-        </div>
+  const handleUnlike = async () => {
+    await api.unlikePaper(paper.id);
+    queryClient.setQueryData<Paper[]>(["likedPapers"], (old) =>
+      old?.filter((p) => p.id !== paper.id),
     );
+  };
+
+  return (
+    <div className="card liked-paper-item" style={style}>
+      <div className="liked-paper-header">
+        <p className="conference">
+          {paper.conference_name} {paper.year}
+        </p>
+        <StarButton onClick={handleUnlike} isLiked={true} title="いいね取り消し" />
+      </div>
+      <h3>{paper.title}</h3>
+      <p className="authors">{paper.authors || "著者情報なし"}</p>
+      {paper.url && (
+        <a href={paper.url} target="_blank" rel="noopener noreferrer">
+          論文を読む
+        </a>
+      )}
+      <details>
+        <summary>アブストラクト</summary>
+        <p className="abstract">{paper.abstract_text || "アブストラクトはありません。"}</p>
+      </details>
+    </div>
+  );
 }
