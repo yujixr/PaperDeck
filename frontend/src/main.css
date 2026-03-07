@@ -7,6 +7,8 @@
   background-color: var(--color-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "palt", "kern", "liga";
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -24,16 +26,18 @@ body {
 h1 {
   font-family: var(--font-heading);
   font-size: 2em;
-  line-height: 1.2;
+  line-height: 1.4;
   font-weight: 700;
   color: var(--color-text);
+  text-wrap: balance;
 }
 
 h2,
 h3 {
   font-family: var(--font-heading);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
 a {

@@ -33,7 +33,8 @@
 
 .paper-card .abstract {
   padding: 1rem 1.25rem;
-  line-height: 1.7;
+  line-height: 1.75;
+  hyphens: auto;
   font-size: 0.95rem;
 }
 

@@ -1,7 +1,7 @@
 :root {
   /* Typography */
-  --font-heading: "Cormorant Garamond", "Georgia", serif;
-  --font-body: "Source Serif 4", "Georgia", serif;
+  --font-heading: "Cormorant Garamond", "Noto Serif JP", "Georgia", serif;
+  --font-body: "Source Serif 4", "Noto Serif JP", "Georgia", serif;
 
   /* Colors - Background */
   --color-bg: #f5f0e8;
