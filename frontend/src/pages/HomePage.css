@@ -1,84 +1,88 @@
-.paper-card.exiting {
-  animation: card-exit var(--duration-fast) var(--easing-gentle) forwards;
-  pointer-events: none;
-}
-
-.paper-card {
-  padding: 2rem 2rem 1.5rem;
-  max-width: 640px;
-  margin: 2rem auto;
-  text-align: left;
-  gap: 0.75rem;
-  animation: card-enter var(--duration-slow) var(--easing-gentle);
-}
-
-.paper-card .conference {
-  font-size: 0.8rem;
-}
-
-.paper-title-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.paper-title-container h3 {
-  flex-grow: 1;
-}
-
-.paper-card h3 {
-  font-size: 1.5rem;
-}
-
-.paper-card .abstract {
-  padding: 1rem 1.25rem;
-  line-height: 1.75;
-  hyphens: auto;
-  font-size: 0.95rem;
-}
-
-.paper-card a:hover {
-  text-decoration: underline;
-}
-
-.card-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.card-actions .btn {
-  flex: 1;
-  max-width: 280px;
-}
-
-/* --- Mobile (≤640px) --- */
-@media (max-width: 640px) {
+@layer pages {
   .paper-card {
-    padding: 1rem 0.875rem 0.875rem;
-    margin: 0.75rem auto;
+    padding-block: 2rem 1.5rem;
+    padding-inline: 2rem;
+    max-inline-size: 640px;
+    margin-inline: auto;
+    margin-block: 2rem;
+    text-align: left;
+    gap: 0.75rem;
+    animation: card-enter var(--duration-slow) var(--easing-gentle);
+
+    &.exiting {
+      animation: card-exit var(--duration-fast) var(--easing-gentle) forwards;
+      pointer-events: none;
+    }
+
+    & .conference {
+      font-size: 0.8rem;
+    }
+
+    & h3 {
+      font-size: 1.5rem;
+    }
+
+    & .abstract {
+      padding-block: 1rem;
+      padding-inline: 1.25rem;
+      line-height: 1.75;
+      hyphens: auto;
+      font-size: 0.95rem;
+    }
+
+    & a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      padding-block: 1rem 0.875rem;
+      padding-inline: 0.875rem;
+      margin-block: 0.75rem;
+
+      & h3 {
+        font-size: 1.25rem;
+      }
+
+      & .abstract {
+        padding-block: 0.75rem;
+        padding-inline: 1rem;
+        font-size: 0.9rem;
+      }
+    }
   }
 
-  .paper-card h3 {
-    font-size: 1.25rem;
+  .paper-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+
+    & h3 {
+      flex-grow: 1;
+    }
   }
 
-  .paper-card .abstract {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+  .card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-block-start: 1rem;
+
+    & .btn {
+      flex: 1;
+      max-inline-size: 280px;
+
+      @media (max-width: 640px) {
+        max-inline-size: none;
+      }
+    }
   }
 
-  .card-actions .btn {
-    max-width: none;
+  .paper-card-skeleton {
+    gap: 1rem;
   }
-}
 
-.paper-card-skeleton {
-  gap: 1rem;
-}
-
-.skeleton-abstract {
-  height: 120px;
+  .skeleton-abstract {
+    block-size: 120px;
+  }
 }

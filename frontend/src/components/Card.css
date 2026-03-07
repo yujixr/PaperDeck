@@ -1,51 +1,56 @@
-.card {
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-}
+@layer components {
+  .card {
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
 
-.card .conference {
-  font-family: var(--font-body);
-  font-weight: 600;
-  color: var(--color-accent);
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
+    & .conference {
+      font-family: var(--font-body);
+      font-weight: 600;
+      color: var(--color-accent);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
 
-.card .abstract {
-  border-left: 3px solid var(--color-accent);
-  background-color: var(--color-bg);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  color: var(--color-text-secondary);
-  margin: 0;
-}
+    & .abstract {
+      border-inline-start: 3px solid var(--color-accent);
+      background-color: var(--color-bg);
+      border-start-start-radius: 0;
+      border-start-end-radius: var(--radius);
+      border-end-start-radius: 0;
+      border-end-end-radius: var(--radius);
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
 
-.card h3 {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--color-text);
-}
+    & h3 {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--color-text);
+    }
 
-.card .authors {
-  color: var(--color-text-muted);
-  margin: 0;
-}
+    & .authors {
+      color: var(--color-text-muted);
+      margin: 0;
+    }
 
-.card details {
-  margin-top: 0.25rem;
-}
+    & details {
+      margin-block-start: 0.25rem;
 
-.card details summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  transition: color var(--transition-fast);
-}
+      & summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+        transition: color var(--transition-fast);
 
-.card details summary:hover {
-  color: var(--color-text);
+        &:hover {
+          color: var(--color-text);
+        }
+      }
+    }
+  }
 }

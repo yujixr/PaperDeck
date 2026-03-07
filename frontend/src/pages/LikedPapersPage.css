@@ -1,46 +1,45 @@
-.liked-papers-container {
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  text-align: left;
-}
+@layer pages {
+  .liked-papers-container {
+    inline-size: 100%;
+    max-inline-size: 900px;
+    margin-inline: auto;
+    text-align: left;
 
-.liked-papers-container h1 {
-  margin-bottom: 1.5rem;
-  font-family: var(--font-heading);
-}
+    & h1 {
+      margin-block-end: 1.5rem;
+      font-family: var(--font-heading);
 
-.my-masonry-grid {
-  display: flex;
-  margin-left: -1.25rem;
-  width: auto;
-}
-
-.my-masonry-grid_column {
-  padding-left: 1.25rem;
-  background-clip: padding-box;
-}
-
-.my-masonry-grid_column > .liked-paper-item {
-  margin-bottom: 1.25rem;
-}
-
-/* --- Mobile (≤640px) --- */
-@media (max-width: 640px) {
-  .liked-papers-container h1 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+      @media (max-width: 640px) {
+        font-size: 1.5rem;
+        margin-block-end: 1rem;
+      }
+    }
   }
 
   .my-masonry-grid {
-    margin-left: -0.75rem;
+    display: flex;
+    margin-inline-start: -1.25rem;
+    inline-size: auto;
+
+    @media (max-width: 640px) {
+      margin-inline-start: -0.75rem;
+    }
   }
 
   .my-masonry-grid_column {
-    padding-left: 0.75rem;
-  }
+    padding-inline-start: 1.25rem;
+    background-clip: padding-box;
 
-  .my-masonry-grid_column > .liked-paper-item {
-    margin-bottom: 0.75rem;
+    & > .liked-paper-item {
+      margin-block-end: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      padding-inline-start: 0.75rem;
+
+      & > .liked-paper-item {
+        margin-block-end: 0.75rem;
+      }
+    }
   }
 }

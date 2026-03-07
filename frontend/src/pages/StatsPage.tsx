@@ -142,7 +142,7 @@ function Heatmap({ daily }: { daily: StatsResponse["daily"] }) {
   );
 }
 
-function PaperItem({ paper }: { paper: ReadPaper }) {
+function PaperItem({ paper, index }: { paper: ReadPaper; index: number }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const queryClient = useQueryClient();
   const likeMutation = useMutation({
@@ -154,7 +154,7 @@ function PaperItem({ paper }: { paper: ReadPaper }) {
   const close = () => dialogRef.current?.close();
 
   return (
-    <div className="read-paper-item">
+    <div className="read-paper-item" style={{ "--i": Math.min(index, 15) } as React.CSSProperties}>
       <div className="read-paper-header">
         <button type="button" className="read-paper-title" onClick={open}>
           {paper.title}
@@ -225,8 +225,8 @@ function ReadPapersList({ papers }: { papers: ReadPaper[] }) {
       {[...grouped.entries()].map(([date, items]) => (
         <div key={date} className="read-papers-group">
           <h3 className="read-papers-date">{formatDateHeading(date)}</h3>
-          {items.map((paper) => (
-            <PaperItem key={paper.id} paper={paper} />
+          {items.map((paper, i) => (
+            <PaperItem key={paper.id} paper={paper} index={i} />
           ))}
         </div>
       ))}
@@ -268,15 +268,15 @@ export function StatsPage() {
     <div className="stats-container">
       <h1>統計</h1>
       <div className="stats-summary">
-        <div className="stats-card">
+        <div className="stats-card" style={{ "--i": 0 } as React.CSSProperties}>
           <span className="stats-card-value">{data.summary.today}</span>
           <span className="stats-card-label">今日</span>
         </div>
-        <div className="stats-card">
+        <div className="stats-card" style={{ "--i": 1 } as React.CSSProperties}>
           <span className="stats-card-value">{data.summary.week}</span>
           <span className="stats-card-label">今週</span>
         </div>
-        <div className="stats-card">
+        <div className="stats-card" style={{ "--i": 2 } as React.CSSProperties}>
           <span className="stats-card-value">{data.summary.total}</span>
           <span className="stats-card-label">累計</span>
         </div>

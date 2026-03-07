@@ -1,38 +1,49 @@
-@keyframes card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
+@layer base {
+  @keyframes card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes card-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0);
+  @keyframes card-exit {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
   }
-  to {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-}
 
-@keyframes skeleton-pulse {
-  0%,
-  100% {
-    background-color: #e8e2d8;
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      background-color: var(--color-skeleton-base);
+    }
+    50% {
+      background-color: var(--color-skeleton-highlight);
+    }
   }
-  50% {
-    background-color: #ddd6ca;
-  }
-}
 
-@keyframes details-open {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
+  @keyframes details-open {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }

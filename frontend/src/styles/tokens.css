@@ -1,49 +1,64 @@
-:root {
-  /* Typography */
-  --font-heading: "Cormorant Garamond", "Noto Serif JP", "Georgia", serif;
-  --font-body: "Source Serif 4", "Noto Serif JP", "Georgia", serif;
+@layer tokens {
+  :root {
+    /* Typography */
+    --font-heading: "Cormorant Garamond", "Noto Serif JP", "Georgia", serif;
+    --font-body: "Source Serif 4", "Noto Serif JP", "Georgia", serif;
 
-  /* Colors - Background */
-  --color-bg: #f5f0e8;
-  --color-card: #fffefa;
+    /* Colors - Background */
+    --color-bg: oklch(0.957 0.012 80);
+    --color-card: oklch(0.997 0.005 95);
 
-  /* Colors - Text */
-  --color-text: #1a1714;
-  --color-text-secondary: #5c554b;
-  --color-text-muted: #9a9185;
+    /* Colors - Text */
+    --color-text: oklch(0.207 0.008 67);
+    --color-text-secondary: oklch(0.453 0.018 77);
+    --color-text-muted: oklch(0.661 0.02 75);
 
-  /* Colors - Accent */
-  --color-accent: #2d5f4a;
-  --color-accent-hover: #1f4435;
-  --color-star: #b8860b;
-  --color-star-hover: #d4a017;
+    /* Colors - Accent */
+    --color-accent: oklch(0.444 0.065 164);
+    --color-accent-hover: color-mix(in oklch, var(--color-accent), black 20%);
 
-  /* Colors - Status */
-  --color-success: #2d6a4f;
-  --color-error: #8b2020;
+    /* Colors - Star */
+    --color-star: oklch(0.652 0.132 82);
+    --color-star-hover: color-mix(in oklch, var(--color-star), white 15%);
 
-  /* Colors - Border & Surface */
-  --color-border: #d6cebe;
-  --color-navbar: #f5f0e8;
-  --color-backdrop: rgba(26, 23, 20, 0.3);
+    /* Colors - Status */
+    --color-success: oklch(0.476 0.078 162);
+    --color-error: oklch(0.422 0.143 26);
 
-  /* Layout */
-  --radius: 6px;
-  --shadow-card: 0 2px 8px rgba(26, 23, 20, 0.08);
-  --shadow-card-hover: 0 4px 16px rgba(26, 23, 20, 0.14);
-  --shadow-navbar: 0 1px 4px rgba(26, 23, 20, 0.06);
+    /* Colors - Border & Surface */
+    --color-border: oklch(0.853 0.023 85);
+    --color-backdrop: oklch(0.207 0.008 67 / 0.3);
 
-  /* Noise texture (inline SVG) */
-  --texture-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    /* Colors - Derived surfaces */
+    --color-white: oklch(1 0 0);
+    --color-success-bg: color-mix(in oklch, var(--color-success), white 88%);
+    --color-success-border: color-mix(in oklch, var(--color-success), white 75%);
+    --color-error-bg: color-mix(in oklch, var(--color-error), white 88%);
+    --color-error-border: color-mix(in oklch, var(--color-error), white 75%);
+    --color-skeleton-base: oklch(0.915 0.015 81);
+    --color-skeleton-highlight: oklch(0.878 0.018 81);
 
-  /* Duration */
-  --duration-fast: 0.4s;
-  --duration-base: 0.55s;
-  --duration-slow: 0.75s;
-  --easing-gentle: cubic-bezier(0.22, 1, 0.36, 1);
+    /* Layout */
+    --radius: 6px;
+    --radius-sm: 2px;
+    --radius-lg: 12px;
+    --shadow-card: 0 2px 8px rgba(26, 23, 20, 0.08);
+    --shadow-card-hover: 0 4px 16px rgba(26, 23, 20, 0.14);
+    --shadow-navbar: 0 1px 4px rgba(26, 23, 20, 0.06);
+    --shadow-dropdown: 0 4px 8px rgba(26, 23, 20, 0.1);
 
-  /* Transition (shorthand) */
-  --transition-fast: var(--duration-fast) ease;
-  --transition-base: var(--duration-base) ease;
-  --transition-slow: var(--duration-slow) var(--easing-gentle);
+    /* Noise texture (inline SVG) */
+    --texture-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+    /* Duration */
+    --duration-fast: 0.4s;
+    --duration-base: 0.55s;
+    --duration-slow: 0.75s;
+    --easing-gentle: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* Transition (shorthand) */
+    --transition-fast: var(--duration-fast) ease;
+    --transition-base: var(--duration-base) ease;
+    --transition-slow: var(--duration-slow) var(--easing-gentle);
+  }
 }
