@@ -75,6 +75,23 @@ export type AuthToken = {
   token_type: string;
 };
 
+export type StatsResponse = {
+  daily: { date: string; count: number }[];
+  summary: { today: number; week: number; total: number };
+};
+
+export type ReadPaper = {
+  id: number;
+  conference_name: string;
+  year: number;
+  title: string;
+  url: string | null;
+  authors: string | null;
+  abstract_text: string | null;
+  read_at: string;
+  liked_at: string | null;
+};
+
 // --- API Functions ---
 
 export const api = {
@@ -110,5 +127,11 @@ export const api = {
   },
   readPaper(paperId: number) {
     return fetchJson<void>("POST", `/api/papers/${paperId}/read`);
+  },
+  getStats() {
+    return fetchJson<StatsResponse>("GET", "/api/papers/stats");
+  },
+  getReadPapers() {
+    return fetchJson<ReadPaper[]>("GET", "/api/papers/read");
   },
 };

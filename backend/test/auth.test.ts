@@ -22,7 +22,6 @@ describe("Auth API", () => {
     await env.DB.exec(
       "CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, token_invalidated_at TEXT);",
     );
-
   });
 
   it("POST /api/auth/register — success", async () => {

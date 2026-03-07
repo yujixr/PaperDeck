@@ -81,6 +81,47 @@ papers.get("/next", async (c) => {
   return c.json(paper);
 });
 
+// GET /papers/stats
+papers.get("/stats", async (c) => {
+  const userId = c.get("userId");
+
+  const { results } = await c.env.DB.prepare(
+    `SELECT DATE(created_at) AS date, COUNT(*) AS count
+     FROM user_paper_status
+     WHERE user_id = ?
+       AND created_at >= DATE('now', '-365 days')
+     GROUP BY DATE(created_at)
+     ORDER BY date ASC`,
+  )
+    .bind(userId)
+    .all<{ date: string; count: number }>();
+
+  const totalResult = await c.env.DB.prepare(
+    `SELECT COUNT(*) AS total FROM user_paper_status WHERE user_id = ?`,
+  )
+    .bind(userId)
+    .first<{ total: number }>();
+
+  const today = new Date().toISOString().slice(0, 10);
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+
+  let todayCount = 0;
+  let weekCount = 0;
+  for (const row of results) {
+    if (row.date === today) todayCount = row.count;
+    if (row.date >= weekAgo) weekCount += row.count;
+  }
+
+  return c.json({
+    daily: results,
+    summary: {
+      today: todayCount,
+      week: weekCount,
+      total: totalResult?.total ?? 0,
+    },
+  });
+});
+
 // GET /papers/liked
 papers.get("/liked", async (c) => {
   const userId = c.get("userId");
@@ -91,6 +132,23 @@ papers.get("/liked", async (c) => {
      JOIN user_paper_status ups ON p.id = ups.paper_id
      WHERE ups.user_id = ? AND ups.liked_at IS NOT NULL
      ORDER BY ups.liked_at DESC`,
+  )
+    .bind(userId)
+    .all();
+
+  return c.json(results);
+});
+
+// GET /papers/read
+papers.get("/read", async (c) => {
+  const userId = c.get("userId");
+
+  const { results } = await c.env.DB.prepare(
+    `SELECT p.*, ups.created_at AS read_at, ups.liked_at
+     FROM papers p
+     JOIN user_paper_status ups ON p.id = ups.paper_id
+     WHERE ups.user_id = ?
+     ORDER BY ups.created_at DESC`,
   )
     .bind(userId)
     .all();

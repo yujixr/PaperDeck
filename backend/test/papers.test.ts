@@ -145,4 +145,100 @@ describe("Papers API", () => {
     const res = await SELF.fetch("http://localhost/api/papers/next");
     expect(res.status).toBe(401);
   });
+
+  it("GET /api/papers/stats — returns stats with no data initially", async () => {
+    // Use a fresh user so stats are empty
+    const hash = await hashPassword("statspass");
+    await env.DB.prepare("INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)")
+      .bind("statsuser", hash)
+      .run();
+    const user = await env.DB.prepare("SELECT user_id FROM users WHERE username = ?")
+      .bind("statsuser")
+      .first<{ user_id: number }>();
+    if (!user) throw new Error("User not found");
+    const statsToken = await createJwt(user.user_id, "test-secret-key-for-development-only");
+
+    const res = await SELF.fetch("http://localhost/api/papers/stats", {
+      headers: { Authorization: `Bearer ${statsToken}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      daily: { date: string; count: number }[];
+      summary: { today: number; week: number; total: number };
+    };
+    expect(body.daily).toEqual([]);
+    expect(body.summary).toEqual({ today: 0, week: 0, total: 0 });
+  });
+
+  it("GET /api/papers/stats — returns correct counts after reading papers", async () => {
+    // Ensure data exists by calling like/read through the API first
+    await SELF.fetch("http://localhost/api/papers/1/like", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await SELF.fetch("http://localhost/api/papers/2/read", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const res = await SELF.fetch("http://localhost/api/papers/stats", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      daily: { date: string; count: number }[];
+      summary: { today: number; week: number; total: number };
+    };
+    // Previous tests in this file have liked paper 1 and read paper 2
+    expect(body.summary.total).toBeGreaterThanOrEqual(2);
+    expect(body.daily.length).toBeGreaterThanOrEqual(1);
+    // Each entry has date and count
+    for (const entry of body.daily) {
+      expect(entry.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(entry.count).toBeGreaterThan(0);
+    }
+  });
+
+  it("GET /api/papers/stats — without auth returns 401", async () => {
+    const res = await SELF.fetch("http://localhost/api/papers/stats");
+    expect(res.status).toBe(401);
+  });
+
+  it("GET /api/papers/read — returns read papers in descending order", async () => {
+    // Ensure papers 1 and 2 are read
+    await SELF.fetch("http://localhost/api/papers/1/read", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await SELF.fetch("http://localhost/api/papers/2/read", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const res = await SELF.fetch("http://localhost/api/papers/read", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(200);
+    const papers = (await res.json()) as {
+      id: number;
+      title: string;
+      read_at: string;
+      conference_name: string;
+      year: number;
+    }[];
+    expect(papers.length).toBeGreaterThanOrEqual(2);
+    // Each paper has read_at
+    for (const p of papers) {
+      expect(p.read_at).toBeDefined();
+      expect(p.title).toBeDefined();
+    }
+    // Ordered by read_at descending (most recent first)
+    for (let i = 1; i < papers.length; i++) {
+      expect(papers[i - 1].read_at >= papers[i].read_at).toBe(true);
+    }
+  });
+
+  it("GET /api/papers/read — without auth returns 401", async () => {
+    const res = await SELF.fetch("http://localhost/api/papers/read");
+    expect(res.status).toBe(401);
+  });
 });

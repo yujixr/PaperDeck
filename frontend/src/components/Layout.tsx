@@ -76,6 +76,15 @@ export function Layout() {
           >
             いいね一覧
           </NavLink>
+          <NavLink
+            to="/stats"
+            onClick={(e) => {
+              e.preventDefault();
+              vtNavigate("/stats");
+            }}
+          >
+            統計
+          </NavLink>
           <SettingsDialog trigger="設定" />
         </nav>
         <div className="nav-actions">

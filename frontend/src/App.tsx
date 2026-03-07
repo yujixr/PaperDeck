@@ -6,6 +6,7 @@ import { HomePage } from "./pages/HomePage";
 import { LikedPapersPage } from "./pages/LikedPapersPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { StatsPage } from "./pages/StatsPage";
 
 function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,6 +36,7 @@ function AppRoutes() {
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/liked" element={<LikedPapersPage />} />
+          <Route path="/stats" element={<StatsPage />} />
         </Route>
       </Route>
       <Route path="*" element={<h1>404 Not Found</h1>} />
