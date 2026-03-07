@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { insertPapers } from "./db";
+import { parseScis } from "./parser-scis";
 import { parseUsenix } from "./parser-usenix";
 
 const DB_NAME = "paperdeck-db";
@@ -23,12 +24,14 @@ program
       }
       const html = await res.text();
 
-      const hostname = new URL(url).hostname;
+      const parsed = new URL(url);
       let papers: ReturnType<typeof parseUsenix> | undefined;
-      if (hostname.includes("usenix.org")) {
+      if (parsed.hostname.includes("usenix.org")) {
         papers = parseUsenix(html, url);
+      } else if (parsed.href.includes("iwsec.org/scis/")) {
+        papers = parseScis(html, url);
       } else {
-        console.error(`No parser for hostname: ${hostname}`);
+        console.error(`No parser for hostname: ${parsed.hostname}`);
         continue;
       }
 
