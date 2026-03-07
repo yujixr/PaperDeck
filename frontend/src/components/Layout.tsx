@@ -85,7 +85,7 @@ export function Layout() {
           >
             統計
           </NavLink>
-          <SettingsDialog trigger="設定" />
+          <SettingsDialog trigger="設定" onClose={() => setMenuOpen(false)} />
         </nav>
         <div className="nav-actions">
           <SettingsDialog />

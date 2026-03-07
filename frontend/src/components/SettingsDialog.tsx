@@ -6,7 +6,13 @@ import { type ConferenceFilter, useConferenceFilter } from "../context/Conferenc
 import { Button } from "./Button";
 import "./SettingsDialog.css";
 
-export function SettingsDialog({ trigger }: { trigger?: React.ReactNode }) {
+export function SettingsDialog({
+  trigger,
+  onClose: onCloseProp,
+}: {
+  trigger?: React.ReactNode;
+  onClose?: () => void;
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const { user, logout } = useAuth();
   const { filter, setFilter } = useConferenceFilter();
@@ -24,6 +30,7 @@ export function SettingsDialog({ trigger }: { trigger?: React.ReactNode }) {
   const close = () => {
     setFilter(localFilter);
     dialogRef.current?.close();
+    onCloseProp?.();
   };
 
   const handleFilterChange = (value: string) => {
