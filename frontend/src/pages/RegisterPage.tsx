@@ -2,8 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ApiError } from "../api";
 import { useAuth } from "../auth/AuthProvider";
+import { AuthLayout } from "../components/AuthLayout";
 import { Button } from "../components/Button";
-import "../components/AuthForm.css";
 
 export function RegisterPage() {
   const { register, login } = useAuth();
@@ -58,49 +58,51 @@ export function RegisterPage() {
   );
 
   return (
-    <div className="form-container">
-      <h1>ユーザー登録</h1>
+    <AuthLayout>
+      <div className="form-container">
+        <h2>ユーザー登録</h2>
 
-      <div className="form-card">
-        <form onSubmit={handleSubmit}>
-          {successMessage && (
-            <p className="status-message status-message-success">{successMessage}</p>
-          )}
-          {error && <p className="status-message status-message-error">{error}</p>}
+        <div className="form-card">
+          <form onSubmit={handleSubmit}>
+            {successMessage && (
+              <p className="status-message status-message-success">{successMessage}</p>
+            )}
+            {error && <p className="status-message status-message-error">{error}</p>}
 
-          <div className="form-group">
-            <label htmlFor="username">ユーザー名:</label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="username">ユーザー名:</label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="password">パスワード:</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="password">パスワード:</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
 
-          <Button type="submit" size="large" fullWidth disabled={isSubmitting || !isFormValid}>
-            {isSubmitting ? "登録中..." : "登録"}
-          </Button>
-        </form>
+            <Button type="submit" size="large" fullWidth disabled={isSubmitting || !isFormValid}>
+              {isSubmitting ? "登録中..." : "登録"}
+            </Button>
+          </form>
+        </div>
+
+        <p>
+          すでにアカウントをお持ちですか？ <Link to="/login">ログインはこちら</Link>
+        </p>
       </div>
-
-      <p>
-        すでにアカウントをお持ちですか？ <Link to="/login">ログインはこちら</Link>
-      </p>
-    </div>
+    </AuthLayout>
   );
 }

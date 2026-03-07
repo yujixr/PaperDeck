@@ -23,6 +23,14 @@ body {
   padding: 2rem;
 }
 
+#root:has(.auth-layout) {
+  padding: 0;
+}
+
+body:has(.auth-layout) {
+  background-color: var(--color-accent);
+}
+
 h1 {
   font-family: var(--font-heading);
   font-size: 2em;
