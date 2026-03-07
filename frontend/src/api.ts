@@ -129,7 +129,8 @@ export const api = {
     return fetchJson<void>("POST", `/api/papers/${paperId}/read`);
   },
   getStats() {
-    return fetchJson<StatsResponse>("GET", "/api/papers/stats");
+    const tz = String(-new Date().getTimezoneOffset());
+    return fetchJson<StatsResponse>("GET", "/api/papers/stats", undefined, { tz });
   },
   getReadPapers() {
     return fetchJson<ReadPaper[]>("GET", "/api/papers/read");

@@ -199,6 +199,45 @@ describe("Papers API", () => {
     }
   });
 
+  it("GET /api/papers/stats?tz=540 — groups dates by user timezone", async () => {
+    // Create a fresh user for this test
+    const hash = await hashPassword("tzpass");
+    await env.DB.prepare("INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)")
+      .bind("tzuser", hash)
+      .run();
+    const user = await env.DB.prepare("SELECT user_id FROM users WHERE username = ?")
+      .bind("tzuser")
+      .first<{ user_id: number }>();
+    if (!user) throw new Error("User not found");
+    const tzToken = await createJwt(user.user_id, "test-secret-key-for-development-only");
+
+    // Insert a record at 23:30 UTC — in JST (+9h) this is 08:30 the next day
+    await env.DB.prepare(
+      "INSERT INTO user_paper_status (user_id, paper_id, created_at) VALUES (?, ?, ?)",
+    )
+      .bind(user.user_id, 1, "2025-06-15 23:30:00")
+      .run();
+
+    // Without tz (defaults to UTC): should be grouped under 2025-06-15
+    const resUtc = await SELF.fetch("http://localhost/api/papers/stats", {
+      headers: { Authorization: `Bearer ${tzToken}` },
+    });
+    const bodyUtc = (await resUtc.json()) as {
+      daily: { date: string; count: number }[];
+    };
+    expect(bodyUtc.daily.find((d) => d.date === "2025-06-15")?.count).toBe(1);
+
+    // With tz=540 (JST, +9 hours): should be grouped under 2025-06-16
+    const resJst = await SELF.fetch("http://localhost/api/papers/stats?tz=540", {
+      headers: { Authorization: `Bearer ${tzToken}` },
+    });
+    const bodyJst = (await resJst.json()) as {
+      daily: { date: string; count: number }[];
+    };
+    expect(bodyJst.daily.find((d) => d.date === "2025-06-16")?.count).toBe(1);
+    expect(bodyJst.daily.find((d) => d.date === "2025-06-15")).toBeUndefined();
+  });
+
   it("GET /api/papers/stats — without auth returns 401", async () => {
     const res = await SELF.fetch("http://localhost/api/papers/stats");
     expect(res.status).toBe(401);

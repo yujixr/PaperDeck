@@ -34,7 +34,7 @@ function buildHeatmapData(daily: StatsResponse["daily"]): Map<string, number> {
 function groupByDate(papers: ReadPaper[]): Map<string, ReadPaper[]> {
   const groups = new Map<string, ReadPaper[]>();
   for (const paper of papers) {
-    const date = paper.read_at.slice(0, 10);
+    const date = getDateKey(new Date(`${paper.read_at}Z`));
     const group = groups.get(date);
     if (group) {
       group.push(paper);

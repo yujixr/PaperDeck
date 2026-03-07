@@ -6,6 +6,13 @@ const papers = new Hono<Env>();
 
 papers.use("/*", authMiddleware);
 
+function parseTzOffset(raw: string | undefined): number {
+  if (!raw) return 0;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < -840 || n > 840) return 0;
+  return n;
+}
+
 function parsePaperId(raw: string): number | null {
   const id = parseInt(raw, 10);
   return Number.isFinite(id) && id > 0 ? id : null;
@@ -84,16 +91,18 @@ papers.get("/next", async (c) => {
 // GET /papers/stats
 papers.get("/stats", async (c) => {
   const userId = c.get("userId");
+  const tzOffset = parseTzOffset(c.req.query("tz"));
+  const tzModifier = `${tzOffset} minutes`;
 
   const { results } = await c.env.DB.prepare(
-    `SELECT DATE(created_at) AS date, COUNT(*) AS count
+    `SELECT DATE(created_at, ?) AS date, COUNT(*) AS count
      FROM user_paper_status
      WHERE user_id = ?
-       AND created_at >= DATE('now', '-365 days')
-     GROUP BY DATE(created_at)
+       AND created_at >= DATE('now', ?, '-365 days')
+     GROUP BY DATE(created_at, ?)
      ORDER BY date ASC`,
   )
-    .bind(userId)
+    .bind(tzModifier, userId, tzModifier, tzModifier)
     .all<{ date: string; count: number }>();
 
   const totalResult = await c.env.DB.prepare(
@@ -102,8 +111,9 @@ papers.get("/stats", async (c) => {
     .bind(userId)
     .first<{ total: number }>();
 
-  const today = new Date().toISOString().slice(0, 10);
-  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const now = new Date(Date.now() + tzOffset * 60000);
+  const today = now.toISOString().slice(0, 10);
+  const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10);
 
   let todayCount = 0;
   let weekCount = 0;
