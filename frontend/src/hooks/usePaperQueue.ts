@@ -35,13 +35,33 @@ async function fetchDedupedPaper(
   return null;
 }
 
+// Cache persisted to localStorage: survives page navigation, reload, and tab close
+const CACHE_KEY = "paper_queue_cache";
+
+type Cache = { current: Paper | null; next: Paper | null; allDone: boolean };
+
+function loadCache(): Cache | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCache(current: Paper | null, next: Paper | null, allDone: boolean) {
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ current, next, allDone }));
+}
+
+let cache = loadCache();
+
 export function usePaperQueue(filter: ConferenceFilter | null) {
-  const [current, setCurrent] = useState<Paper | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [allDone, setAllDone] = useState(false);
+  const [current, setCurrent] = useState<Paper | null>(() => cache?.current ?? null);
+  const [isLoading, setIsLoading] = useState(() => cache?.current === null && !cache?.allDone);
+  const [allDone, setAllDone] = useState(() => cache?.allDone ?? false);
   const [error, setError] = useState<Error | null>(null);
 
-  const nextRef = useRef<Paper | null>(null);
+  const nextRef = useRef<Paper | null>(cache?.next ?? null);
   const genRef = useRef(0);
   const filterRef = useRef(filter);
   const currentRef = useRef(current);
@@ -59,6 +79,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
       if (first === null) {
         setAllDone(true);
         setIsLoading(false);
+        saveCache(null, null, true);
         return;
       }
 
@@ -70,6 +91,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
 
       nextRef.current = second;
       if (second === null) setAllDone(true);
+      saveCache(first, second, second === null);
     } catch (e) {
       if (genRef.current !== gen) return;
       setError(e instanceof Error ? e : new Error(String(e)));
@@ -79,7 +101,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
 
   // Load on mount + reload when filter changes (if buffered papers don't match)
   useEffect(() => {
-    if (genRef.current > 0) {
+    if (genRef.current > 0 || cache !== null) {
       const cur = currentRef.current;
       const nxt = nextRef.current;
       if (
@@ -95,6 +117,8 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
     setIsLoading(true);
     setAllDone(false);
     setError(null);
+    cache = null;
+    localStorage.removeItem(CACHE_KEY);
     loadPair(gen, filter);
   }, [filter, loadPair]);
 
@@ -111,6 +135,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
           if (genRef.current !== gen) return;
           nextRef.current = paper;
           if (paper === null) setAllDone(true);
+          saveCache(next, paper, paper === null);
         })
         .catch(() => {});
       return;
@@ -118,6 +143,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
 
     // 2) No prefetch + all done: clear current to surface "all done" UI
     setCurrent(null);
+    saveCache(null, null, allDoneRef.current);
     if (allDoneRef.current) return;
 
     // 3) No prefetch + not done: reload pair
