@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { Paper } from "../api";
 import { usePaperActions } from "../hooks/usePaperActions";
+import { detectLang } from "../lib/detectLang";
 import { StarButton } from "./StarButton";
 import "./Card.css";
 import "./LikedPaperCard.css";
@@ -25,18 +26,11 @@ export function LikedPaperCard({ paper, style }: { paper: Paper; style?: React.C
   };
 
   return (
-    <div className="card liked-paper-item" style={style}>
-      <div className="liked-paper-header">
-        <p className="conference">
-          {paper.conference_name} {paper.year}
-        </p>
-        <StarButton
-          onClick={handleUnlike}
-          isLiked={true}
-          disabled={pending}
-          title="いいね取り消し"
-        />
-      </div>
+    <div className="card liked-paper-item" lang={detectLang(paper.title)} style={style}>
+      <p className="conference">
+        {paper.conference_name} {paper.year}
+      </p>
+      <StarButton onClick={handleUnlike} isLiked={true} disabled={pending} title="いいね取り消し" />
       <h3>{paper.title}</h3>
       <p className="authors">{paper.authors || "著者情報なし"}</p>
       {paper.url && (

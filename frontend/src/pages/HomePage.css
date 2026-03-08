@@ -1,5 +1,6 @@
 @layer pages {
   .paper-card {
+    position: relative;
     padding-block: 2rem 1.5rem;
     padding-inline: 2rem;
     max-inline-size: 640px;
@@ -26,8 +27,11 @@
       padding-block: 1rem;
       padding-inline: 1.25rem;
       line-height: 1.75;
-      hyphens: auto;
       font-size: 0.95rem;
+    }
+
+    &:lang(ja) .abstract {
+      text-align: justify;
     }
 
     & a:hover {
@@ -51,14 +55,14 @@
     }
   }
 
-  .paper-title-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
+  .paper-card > .star-button {
+    position: absolute;
+    inset-block-start: 1.5rem;
+    inset-inline-end: 1.5rem;
 
-    & h3 {
-      flex-grow: 1;
+    @media (max-width: 640px) {
+      inset-block-start: 0.5rem;
+      inset-inline-end: 0.5rem;
     }
   }
 

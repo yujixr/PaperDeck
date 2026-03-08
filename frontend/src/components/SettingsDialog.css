@@ -22,7 +22,6 @@
 
     & h2 {
       margin: 0;
-      font-family: var(--font-heading);
       font-size: 1.3rem;
     }
   }

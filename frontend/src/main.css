@@ -24,8 +24,12 @@
     background-color: var(--color-bg);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "palt", "kern", "liga";
-    overflow-wrap: break-word;
+    font-feature-settings: "palt", "kern", "liga", "chws";
+    overflow-wrap: anywhere;
+    line-break: strict;
+    hanging-punctuation: first allow-end last;
+    word-break: auto-phrase;
+    text-spacing-trim: space-first;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

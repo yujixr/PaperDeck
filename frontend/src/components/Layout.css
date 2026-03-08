@@ -3,6 +3,7 @@
 @layer base {
   .nav-brand a {
     color: var(--color-text);
+    font-weight: 700;
 
     &:hover {
       color: var(--color-accent);
@@ -11,6 +12,7 @@
 
   .nav-links a {
     color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
 
     &:hover {
       color: var(--color-text);
@@ -54,10 +56,8 @@
     font-family: var(--font-heading);
     font-style: italic;
     font-size: 1.3rem;
-    font-weight: 700;
     letter-spacing: 0.05em;
     text-decoration: none;
-    transition: color var(--transition-fast);
   }
 
   .nav-links {
@@ -71,7 +71,6 @@
       font-size: 0.95rem;
       padding-block-end: 0.25rem;
       border-block-end: 2px solid transparent;
-      transition: all var(--transition-fast);
     }
 
     @media (max-width: 640px) {

@@ -26,10 +26,6 @@
 
     & h3 {
       margin: 0;
-      font-family: var(--font-heading);
-      font-weight: 700;
-      line-height: 1.4;
-      color: var(--color-text);
     }
 
     & .authors {

@@ -7,7 +7,6 @@
 
     & h1 {
       margin-block-end: 1.5rem;
-      font-family: var(--font-heading);
 
       @media (max-width: 640px) {
         font-size: 1.5rem;

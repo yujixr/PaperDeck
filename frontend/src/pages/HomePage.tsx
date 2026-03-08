@@ -4,6 +4,7 @@ import { StarButton } from "../components/StarButton";
 import { useConferenceFilter } from "../context/ConferenceFilterContext";
 import { usePaperActions } from "../hooks/usePaperActions";
 import { usePaperQueue } from "../hooks/usePaperQueue";
+import { detectLang } from "../lib/detectLang";
 import "../components/Card.css";
 import "./HomePage.css";
 
@@ -74,20 +75,19 @@ export function HomePage() {
     <div
       className={`card paper-card${exiting ? " exiting" : ""}`}
       key={paper.id}
+      lang={detectLang(paper.title)}
       onAnimationEnd={handleAnimationEnd}
     >
       <p className="conference">
         {paper.conference_name} {paper.year}
       </p>
-      <div className="paper-title-container">
-        <h3>{paper.title}</h3>
-        <StarButton
-          onClick={handleLike}
-          disabled={exiting}
-          isLiked={false}
-          title="いいね（興味あり）"
-        />
-      </div>
+      <h3>{paper.title}</h3>
+      <StarButton
+        onClick={handleLike}
+        disabled={exiting}
+        isLiked={false}
+        title="いいね（興味あり）"
+      />
       <details>
         <summary>詳細（著者・リンク）</summary>
         <p className="authors" style={{ marginTop: "0.5rem" }}>
