@@ -49,7 +49,8 @@ function loadCache(): Cache | null {
 }
 
 function saveCache(current: Paper | null, next: Paper | null, allDone: boolean) {
-  localStorage.setItem(PAPER_QUEUE_CACHE_KEY, JSON.stringify({ current, next, allDone }));
+  cache = { current, next, allDone };
+  localStorage.setItem(PAPER_QUEUE_CACHE_KEY, JSON.stringify(cache));
 }
 
 let cache = loadCache();
