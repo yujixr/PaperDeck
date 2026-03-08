@@ -24,6 +24,7 @@ pnpm dev:frontend                   # フロントエンド (Vite)
 
 ```bash
 pnpm --filter backend test
+pnpm --filter frontend test
 pnpm --filter crawler test
 pnpm check                          # Biome lint & format (チェックのみ)
 pnpm check:fix                      # Biome lint & format (自動修正)

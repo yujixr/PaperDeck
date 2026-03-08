@@ -29,7 +29,7 @@ async function fetchDedupedPaper(
   f: ConferenceFilter | null,
   excludeId: number,
 ): Promise<Paper | null> {
-  for (let i = 0; i <= MAX_DEDUP_RETRIES; i++) {
+  for (let i = 0; i < MAX_DEDUP_RETRIES; i++) {
     const paper = await fetchPaper(f);
     if (paper === null || paper.id !== excludeId) return paper;
   }
@@ -58,17 +58,17 @@ let cache = loadCache();
 export function usePaperQueue(filter: ConferenceFilter | null) {
   const [current, setCurrent] = useState<Paper | null>(() => cache?.current ?? null);
   const [isLoading, setIsLoading] = useState(() => cache?.current === null && !cache?.allDone);
-  const [allDone, setAllDone] = useState(() => cache?.allDone ?? false);
+  const [noMorePapers, setNoMorePapers] = useState(() => cache?.allDone ?? false);
   const [error, setError] = useState<Error | null>(null);
 
   const nextRef = useRef<Paper | null>(cache?.next ?? null);
   const genRef = useRef(0);
   const filterRef = useRef(filter);
   const currentRef = useRef(current);
-  const allDoneRef = useRef(allDone);
+  const noMorePapersRef = useRef(noMorePapers);
   filterRef.current = filter;
   currentRef.current = current;
-  allDoneRef.current = allDone;
+  noMorePapersRef.current = noMorePapers;
 
   /** Fetch current + next papers. Stale calls (gen mismatch) are discarded. */
   const loadPair = useCallback(async (gen: number, f: ConferenceFilter | null) => {
@@ -77,7 +77,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
       if (genRef.current !== gen) return;
 
       if (first === null) {
-        setAllDone(true);
+        setNoMorePapers(true);
         setIsLoading(false);
         saveCache(null, null, true);
         return;
@@ -85,12 +85,13 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
 
       setCurrent(first);
       setIsLoading(false);
+      saveCache(first, null, false);
 
       const second = await fetchDedupedPaper(f, first.id);
       if (genRef.current !== gen) return;
 
       nextRef.current = second;
-      if (second === null) setAllDone(true);
+      if (second === null) setNoMorePapers(true);
       saveCache(first, second, second === null);
     } catch (e) {
       if (genRef.current !== gen) return;
@@ -115,7 +116,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
     nextRef.current = null;
     setCurrent(null);
     setIsLoading(true);
-    setAllDone(false);
+    setNoMorePapers(false);
     setError(null);
     cache = null;
     localStorage.removeItem(PAPER_QUEUE_CACHE_KEY);
@@ -129,24 +130,25 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
     // 1) Happy path: show prefetched paper, start background prefetch
     if (next !== null) {
       setCurrent(next);
+      saveCache(next, null, noMorePapersRef.current);
       const gen = ++genRef.current;
       fetchDedupedPaper(filterRef.current, next.id)
         .then((paper) => {
           if (genRef.current !== gen) return;
           nextRef.current = paper;
-          if (paper === null) setAllDone(true);
+          if (paper === null) setNoMorePapers(true);
           saveCache(next, paper, paper === null);
         })
-        .catch(() => {});
+        .catch((e) => console.warn("Background prefetch failed:", e));
       return;
     }
 
-    // 2) No prefetch + all done: clear current to surface "all done" UI
+    // 2) No prefetch + no more papers: clear current to surface "all done" UI
     setCurrent(null);
-    saveCache(null, null, allDoneRef.current);
-    if (allDoneRef.current) return;
+    saveCache(null, null, noMorePapersRef.current);
+    if (noMorePapersRef.current) return;
 
-    // 3) No prefetch + not done: reload pair
+    // 3) No prefetch + more papers may exist: reload pair
     setIsLoading(true);
     const gen = ++genRef.current;
     loadPair(gen, filterRef.current);
@@ -155,7 +157,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
   return {
     paper: current,
     isLoading,
-    allDone: allDone && current === null,
+    allDone: noMorePapers && current === null,
     error,
     advance,
   };
