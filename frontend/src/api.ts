@@ -1,4 +1,4 @@
-import { JWT_STORAGE_KEY } from "./lib/apiConfig";
+import { JWT_STORAGE_KEY } from "./lib/storageKeys";
 
 let cachedToken: string | null = null;
 

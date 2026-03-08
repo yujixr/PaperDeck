@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, api, type Paper } from "../api";
 import type { ConferenceFilter } from "../context/ConferenceFilterContext";
+import { PAPER_QUEUE_CACHE_KEY } from "../lib/storageKeys";
 
 const MAX_DEDUP_RETRIES = 3;
 
@@ -36,13 +37,11 @@ async function fetchDedupedPaper(
 }
 
 // Cache persisted to localStorage: survives page navigation, reload, and tab close
-const CACHE_KEY = "paper_queue_cache";
-
 type Cache = { current: Paper | null; next: Paper | null; allDone: boolean };
 
 function loadCache(): Cache | null {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(PAPER_QUEUE_CACHE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -50,7 +49,7 @@ function loadCache(): Cache | null {
 }
 
 function saveCache(current: Paper | null, next: Paper | null, allDone: boolean) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ current, next, allDone }));
+  localStorage.setItem(PAPER_QUEUE_CACHE_KEY, JSON.stringify({ current, next, allDone }));
 }
 
 let cache = loadCache();
@@ -118,7 +117,7 @@ export function usePaperQueue(filter: ConferenceFilter | null) {
     setAllDone(false);
     setError(null);
     cache = null;
-    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(PAPER_QUEUE_CACHE_KEY);
     loadPair(gen, filter);
   }, [filter, loadPair]);
 

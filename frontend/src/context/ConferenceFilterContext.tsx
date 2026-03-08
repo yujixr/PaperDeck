@@ -1,6 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
-
-const STORAGE_KEY = "conference_filter";
+import { CONFERENCE_FILTER_KEY } from "../lib/storageKeys";
 
 export type ConferenceFilter = {
   conference: string;
@@ -15,7 +14,7 @@ type ConferenceFilterContextType = {
 const ConferenceFilterContext = createContext<ConferenceFilterContextType | undefined>(undefined);
 
 function loadFilter(): ConferenceFilter | null {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = localStorage.getItem(CONFERENCE_FILTER_KEY);
   if (!raw) return null;
   const [conference, year] = raw.split("|");
   if (!conference || !year) return null;
@@ -24,9 +23,9 @@ function loadFilter(): ConferenceFilter | null {
 
 function saveFilter(filter: ConferenceFilter | null) {
   if (filter) {
-    localStorage.setItem(STORAGE_KEY, `${filter.conference}|${filter.year}`);
+    localStorage.setItem(CONFERENCE_FILTER_KEY, `${filter.conference}|${filter.year}`);
   } else {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CONFERENCE_FILTER_KEY);
   }
 }
 
