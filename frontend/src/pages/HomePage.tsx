@@ -1,46 +1,15 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { ApiError, api, type Paper } from "../api";
+import { useRef, useState } from "react";
 import { Button } from "../components/Button";
 import { StarButton } from "../components/StarButton";
 import { useConferenceFilter } from "../context/ConferenceFilterContext";
 import { usePaperActions } from "../hooks/usePaperActions";
+import { usePaperQueue } from "../hooks/usePaperQueue";
 import "../components/Card.css";
 import "./HomePage.css";
 
 export function HomePage() {
-  const queryClient = useQueryClient();
   const { filter } = useConferenceFilter();
-  const filterRef = useRef(filter);
-  filterRef.current = filter;
-
-  // フィルタ変更時、現在の論文がフィルタに合致していればリフェッチしない
-  useEffect(() => {
-    if (filter === null) return; // 「すべて」は常に合致
-    const current = queryClient.getQueryData<Paper>(["nextPaper"]);
-    if (
-      current &&
-      current.conference_name === filter.conference &&
-      String(current.year) === filter.year
-    )
-      return;
-    queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
-  }, [filter, queryClient]);
-
-  const {
-    data: paper,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["nextPaper"],
-    queryFn: () => {
-      const f = filterRef.current;
-      return api.getNextPaper(f ? { conference: f.conference, year: f.year } : undefined);
-    },
-    staleTime: Infinity,
-  });
-
+  const { paper, isLoading, allDone, error, advance } = usePaperQueue(filter);
   const { like, markAsRead } = usePaperActions();
   const [exiting, setExiting] = useState(false);
   const animationResolve = useRef<(() => void) | null>(null);
@@ -61,7 +30,7 @@ export function HomePage() {
 
     await Promise.all([waitForAnimation, apiCall]);
 
-    queryClient.removeQueries({ queryKey: ["nextPaper"] });
+    advance();
     setExiting(false);
   };
 
@@ -79,7 +48,7 @@ export function HomePage() {
     );
   }
 
-  if (error instanceof ApiError && error.status === 404) {
+  if (allDone) {
     return (
       <div className="all-done-message">
         <h2>すべて完了しました！</h2>
@@ -88,7 +57,7 @@ export function HomePage() {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <div className="error-message">
         <h2>エラー</h2>
