@@ -5,7 +5,6 @@
     flex-direction: column;
 
     & .conference {
-      font-family: var(--font-body);
       font-weight: 600;
       color: var(--color-accent);
       margin: 0;

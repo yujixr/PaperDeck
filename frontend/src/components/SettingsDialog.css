@@ -8,36 +8,12 @@
     }
   }
 
-  .settings-dialog-content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
+  .settings-dialog > .dialog-content {
     gap: 1.5rem;
   }
 
-  .settings-dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    & h2 {
-      margin: 0;
-      font-size: 1.3rem;
-    }
-  }
-
-  .settings-dialog-close {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 0.25rem;
-    transition: color var(--transition-fast);
-
-    &:hover {
-      color: var(--color-text);
-    }
+  .settings-dialog > .dialog-content > .dialog-header h2 {
+    font-size: 1.3rem;
   }
 
   .settings-section {
@@ -71,7 +47,6 @@
     background-position: right 0.25rem center;
     color: var(--color-text);
     font-size: 1rem;
-    font-family: var(--font-body);
     cursor: pointer;
     transition: border-color var(--transition-base);
 

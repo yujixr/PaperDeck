@@ -12,6 +12,11 @@
     min-inline-size: 320px;
     min-block-size: 100vh;
   }
+
+  button,
+  select {
+    font-family: inherit;
+  }
 }
 
 @layer base {
@@ -59,7 +64,6 @@
     font-size: 2em;
     line-height: 1.4;
     font-weight: 700;
-    color: var(--color-text);
     text-wrap: balance;
   }
 
@@ -172,6 +176,39 @@
   }
 }
 
+@layer components {
+  .dialog-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & h2 {
+      margin: 0;
+    }
+  }
+
+  .dialog-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 0.25rem;
+    flex-shrink: 0;
+    transition: color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+}
+
 @layer utilities {
   .card,
   .form-card,
@@ -197,10 +234,6 @@
       padding: 1rem;
       margin-block: 0.75rem;
     }
-  }
-
-  .all-done-message h2 {
-    color: var(--color-text);
   }
 
   .error-message h2 {

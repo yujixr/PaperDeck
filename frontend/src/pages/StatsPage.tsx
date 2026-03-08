@@ -179,15 +179,10 @@ function PaperItem({ paper, index }: { paper: ReadPaper; index: number }) {
           if (e.key === "Escape") close();
         }}
       >
-        <div className="paper-dialog-content">
-          <div className="paper-dialog-header">
+        <div className="dialog-content">
+          <div className="dialog-header">
             <h2 className="paper-dialog-title">{paper.title}</h2>
-            <button
-              type="button"
-              className="paper-dialog-close"
-              onClick={close}
-              aria-label="閉じる"
-            >
+            <button type="button" className="dialog-close" onClick={close} aria-label="閉じる">
               ✕
             </button>
           </div>

@@ -57,7 +57,6 @@
     font-style: italic;
     font-size: 1.3rem;
     letter-spacing: 0.05em;
-    text-decoration: none;
   }
 
   .nav-links {
@@ -65,8 +64,6 @@
     gap: 1.5rem;
 
     & a {
-      font-family: var(--font-body);
-      text-decoration: none;
       font-weight: 600;
       font-size: 0.95rem;
       padding-block-end: 0.25rem;

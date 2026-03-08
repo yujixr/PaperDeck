@@ -65,10 +65,10 @@ export function SettingsDialog({
           if (e.key === "Escape") close();
         }}
       >
-        <div className="settings-dialog-content">
-          <div className="settings-dialog-header">
+        <div className="dialog-content">
+          <div className="dialog-header">
             <h2>設定</h2>
-            <button type="button" className="settings-dialog-close" onClick={close}>
+            <button type="button" className="dialog-close" onClick={close}>
               ✕
             </button>
           </div>

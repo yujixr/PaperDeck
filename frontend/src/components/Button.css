@@ -4,7 +4,6 @@
     padding-block: 0.6em;
     padding-inline: 1.4em;
     font-weight: 600;
-    font-family: var(--font-body);
     cursor: pointer;
     transition:
       background-color var(--transition-fast),
