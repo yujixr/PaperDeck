@@ -1,0 +1,33 @@
+@layer components {
+  .fullscreen-button {
+    position: fixed;
+    inset-block-end: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-bg);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    opacity: 0.4;
+    transition:
+      opacity var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
+
+    &:hover {
+      opacity: 1;
+      color: var(--color-text);
+      box-shadow: var(--shadow-card);
+    }
+
+    @media (hover: none) {
+      display: none;
+    }
+  }
+}

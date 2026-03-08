@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { FullscreenButton } from "./FullscreenButton";
 import { SettingsDialog } from "./SettingsDialog";
 import "./Layout.css";
 
@@ -103,6 +104,7 @@ export function Layout() {
       <main className="layout-content">
         <Outlet />
       </main>
+      <FullscreenButton />
     </div>
   );
 }
