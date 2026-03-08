@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { insertPapers } from "./db";
+import { parseJstage } from "./parser-jstage";
 import { parseScis } from "./parser-scis";
 import { parseUsenix } from "./parser-usenix";
 
@@ -30,6 +31,8 @@ program
         papers = parseUsenix(html, url);
       } else if (parsed.href.includes("iwsec.org/scis/")) {
         papers = parseScis(html, url);
+      } else if (parsed.hostname.includes("jstage.jst.go.jp")) {
+        papers = parseJstage(html, url);
       } else {
         console.error(`No parser for hostname: ${parsed.hostname}`);
         continue;
