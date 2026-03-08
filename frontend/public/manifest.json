@@ -1,6 +1,8 @@
 {
   "name": "PaperDeck",
   "short_name": "PaperDeck",
+  "description": "研究への出会いを、もっと手軽に",
+  "id": "https://paperdeck.yuji.ne.jp/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f0e8",
