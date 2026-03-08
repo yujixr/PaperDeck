@@ -150,6 +150,7 @@
 
   /* Skeleton loading */
   .skeleton {
+    background-color: var(--color-skeleton);
     animation: skeleton-pulse 1.5s ease-in-out infinite;
     border-radius: var(--radius);
   }
@@ -200,5 +201,21 @@
 
   .error-message h2 {
     color: var(--color-error);
+  }
+}
+
+/* Battery & accessibility: disable all animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }

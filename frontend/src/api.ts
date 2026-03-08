@@ -1,7 +1,22 @@
-const JWT_STORAGE_KEY = "jwt_token";
+import { JWT_STORAGE_KEY } from "./lib/apiConfig";
+
+let cachedToken: string | null = null;
 
 function getToken(): string {
-  return localStorage.getItem(JWT_STORAGE_KEY) || "";
+  if (cachedToken === null) {
+    cachedToken = localStorage.getItem(JWT_STORAGE_KEY) || "";
+  }
+  return cachedToken;
+}
+
+export function setToken(token: string) {
+  cachedToken = token;
+  localStorage.setItem(JWT_STORAGE_KEY, token);
+}
+
+export function clearToken() {
+  cachedToken = "";
+  localStorage.removeItem(JWT_STORAGE_KEY);
 }
 
 async function fetchJson<T>(

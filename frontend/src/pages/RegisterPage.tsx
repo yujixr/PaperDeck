@@ -32,8 +32,6 @@ export function RegisterPage() {
         await login(username, password);
         navigate("/", { replace: true });
       } catch (err) {
-        console.error("Registration Error:", err);
-
         if (err instanceof ApiError) {
           if (err.status === 409) {
             setError("このユーザー名は既に使用されています。");

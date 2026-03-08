@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReadPaper, StatsResponse } from "../api";
 import { ApiError, api } from "../api";
 import { StarButton } from "../components/StarButton";
+import { usePaperActions } from "../hooks/usePaperActions";
 import "./StatsPage.css";
 
 // --- Utility functions ---
@@ -144,11 +145,18 @@ function Heatmap({ daily }: { daily: StatsResponse["daily"] }) {
 
 function PaperItem({ paper, index }: { paper: ReadPaper; index: number }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const queryClient = useQueryClient();
-  const likeMutation = useMutation({
-    mutationFn: () => (paper.liked_at ? api.unlikePaper(paper.id) : api.likePaper(paper.id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["readPapers"] }),
-  });
+  const { like, unlike } = usePaperActions();
+  const [pending, setPending] = useState(false);
+
+  const handleToggleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPending(true);
+    try {
+      await (paper.liked_at ? unlike(paper.id) : like(paper.id));
+    } finally {
+      setPending(false);
+    }
+  };
 
   const open = () => dialogRef.current?.showModal();
   const close = () => dialogRef.current?.close();
@@ -159,14 +167,7 @@ function PaperItem({ paper, index }: { paper: ReadPaper; index: number }) {
         <button type="button" className="read-paper-title" onClick={open}>
           {paper.title}
         </button>
-        <StarButton
-          isLiked={!!paper.liked_at}
-          onClick={(e) => {
-            e.stopPropagation();
-            likeMutation.mutate();
-          }}
-          disabled={likeMutation.isPending}
-        />
+        <StarButton isLiked={!!paper.liked_at} onClick={handleToggleLike} disabled={pending} />
       </div>
       <dialog
         ref={dialogRef}
@@ -238,13 +239,11 @@ export function StatsPage() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stats"],
     queryFn: () => api.getStats(),
-    refetchOnWindowFocus: false,
   });
 
   const { data: readPapers } = useQuery({
     queryKey: ["readPapers"],
     queryFn: () => api.getReadPapers(),
-    refetchOnWindowFocus: false,
   });
 
   if (isLoading) {

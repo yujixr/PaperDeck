@@ -24,10 +24,10 @@
   @keyframes skeleton-pulse {
     0%,
     100% {
-      background-color: var(--color-skeleton-base);
+      opacity: 1;
     }
     50% {
-      background-color: var(--color-skeleton-highlight);
+      opacity: 0.6;
     }
   }
 

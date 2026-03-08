@@ -35,8 +35,7 @@
     --color-success-border: color-mix(in oklch, var(--color-success), white 75%);
     --color-error-bg: color-mix(in oklch, var(--color-error), white 88%);
     --color-error-border: color-mix(in oklch, var(--color-error), white 75%);
-    --color-skeleton-base: oklch(0.915 0.015 81);
-    --color-skeleton-highlight: oklch(0.878 0.018 81);
+    --color-skeleton: oklch(0.915 0.015 81);
 
     /* Layout */
     --radius: 6px;

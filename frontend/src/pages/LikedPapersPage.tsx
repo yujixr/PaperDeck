@@ -13,7 +13,6 @@ export function LikedPapersPage() {
   } = useQuery({
     queryKey: ["likedPapers"],
     queryFn: () => api.getLikedPapers(),
-    refetchOnWindowFocus: false,
   });
 
   if (isLoading) {

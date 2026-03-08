@@ -85,12 +85,6 @@
     block-size: 13px;
     border-radius: var(--radius-sm);
     cursor: default;
-    transition: transform var(--transition-fast);
-
-    &:hover {
-      transform: scale(1.6);
-      z-index: 1;
-    }
 
     &.level-0 {
       background: var(--heatmap-0, #ebedf0);

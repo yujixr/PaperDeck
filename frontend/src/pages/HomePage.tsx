@@ -1,9 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { ApiError, api, type Paper } from "../api";
 import { Button } from "../components/Button";
 import { StarButton } from "../components/StarButton";
 import { useConferenceFilter } from "../context/ConferenceFilterContext";
+import { usePaperActions } from "../hooks/usePaperActions";
 import "../components/Card.css";
 import "./HomePage.css";
 
@@ -38,54 +39,34 @@ export function HomePage() {
       return api.getNextPaper(f ? { conference: f.conference, year: f.year } : undefined);
     },
     staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && error.status === 404) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
-  const likeMutation = useMutation({
-    mutationFn: (paperId: number) => api.likePaper(paperId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
-      queryClient.invalidateQueries({ queryKey: ["likedPapers"] });
-    },
-  });
-
-  const readMutation = useMutation({
-    mutationFn: (paperId: number) => api.readPaper(paperId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["nextPaper"] });
-    },
-  });
-
+  const { like, markAsRead } = usePaperActions();
   const [exiting, setExiting] = useState(false);
-  const pendingAction = useRef<"like" | "read" | null>(null);
-
-  const isMutating = likeMutation.isPending || readMutation.isPending;
-
-  const startExit = (action: "like" | "read") => {
-    if (!paper || exiting) return;
-    pendingAction.current = action;
-    setExiting(true);
-  };
+  const animationResolve = useRef<(() => void) | null>(null);
 
   const handleAnimationEnd = () => {
-    if (!exiting || !paper) return;
-    setExiting(false);
-    if (pendingAction.current === "like") {
-      likeMutation.mutate(paper.id);
-    } else {
-      readMutation.mutate(paper.id);
-    }
-    pendingAction.current = null;
+    animationResolve.current?.();
+    animationResolve.current = null;
   };
 
-  const handleLike = () => startExit("like");
-  const handleRead = () => startExit("read");
+  const dismissPaper = async (action: "like" | "read") => {
+    if (!paper || exiting) return;
+    setExiting(true);
+
+    const waitForAnimation = new Promise<void>((resolve) => {
+      animationResolve.current = resolve;
+    });
+    const apiCall = action === "like" ? like(paper.id) : markAsRead(paper.id);
+
+    await Promise.all([waitForAnimation, apiCall]);
+
+    queryClient.removeQueries({ queryKey: ["nextPaper"] });
+    setExiting(false);
+  };
+
+  const handleLike = () => dismissPaper("like");
+  const handleSkip = () => dismissPaper("read");
 
   if (isLoading) {
     return (
@@ -133,7 +114,7 @@ export function HomePage() {
         <h3>{paper.title}</h3>
         <StarButton
           onClick={handleLike}
-          disabled={isMutating}
+          disabled={exiting}
           isLiked={false}
           title="いいね（興味あり）"
         />
@@ -151,8 +132,8 @@ export function HomePage() {
       </details>
       <p className="abstract">{paper.abstract_text || "アブストラクトはありません。"}</p>
       <div className="card-actions">
-        <Button variant="default" size="large" onClick={handleRead} disabled={isMutating}>
-          {isMutating ? "..." : "次の論文を読む"}
+        <Button variant="default" size="large" onClick={handleSkip} disabled={exiting}>
+          {exiting ? "..." : "次の論文を読む"}
         </Button>
       </div>
     </div>

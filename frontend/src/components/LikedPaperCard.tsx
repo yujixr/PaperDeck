@@ -1,17 +1,27 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { api, type Paper } from "../api";
+import { useState } from "react";
+import type { Paper } from "../api";
+import { usePaperActions } from "../hooks/usePaperActions";
 import { StarButton } from "./StarButton";
 import "./Card.css";
 import "./LikedPaperCard.css";
 
 export function LikedPaperCard({ paper, style }: { paper: Paper; style?: React.CSSProperties }) {
   const queryClient = useQueryClient();
+  const { unlike } = usePaperActions();
+
+  const [pending, setPending] = useState(false);
 
   const handleUnlike = async () => {
-    await api.unlikePaper(paper.id);
-    queryClient.setQueryData<Paper[]>(["likedPapers"], (old) =>
-      old?.filter((p) => p.id !== paper.id),
-    );
+    setPending(true);
+    try {
+      await unlike(paper.id);
+      queryClient.setQueryData<Paper[]>(["likedPapers"], (old) =>
+        old?.filter((p) => p.id !== paper.id),
+      );
+    } catch {
+      setPending(false);
+    }
   };
 
   return (
@@ -20,7 +30,12 @@ export function LikedPaperCard({ paper, style }: { paper: Paper; style?: React.C
         <p className="conference">
           {paper.conference_name} {paper.year}
         </p>
-        <StarButton onClick={handleUnlike} isLiked={true} title="いいね取り消し" />
+        <StarButton
+          onClick={handleUnlike}
+          isLiked={true}
+          disabled={pending}
+          title="いいね取り消し"
+        />
       </div>
       <h3>{paper.title}</h3>
       <p className="authors">{paper.authors || "著者情報なし"}</p>

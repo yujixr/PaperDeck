@@ -27,7 +27,6 @@ export function LoginPage() {
         await login(username, password);
         navigate("/", { replace: true });
       } catch (err) {
-        console.error("Login Error:", err);
         const errorMessage =
           err instanceof Error ? err.message : "ログイン中に不明なエラーが発生しました。";
         setError(errorMessage);

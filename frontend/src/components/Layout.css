@@ -1,3 +1,28 @@
+/* Nav link colors: placed in @layer base so they override the global `a`
+   style via specificity (.nav-brand a > a), not via layer ordering. */
+@layer base {
+  .nav-brand a {
+    color: var(--color-text);
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  .nav-links a {
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-text);
+    }
+
+    &.active {
+      color: var(--color-accent);
+      border-block-end-color: var(--color-accent);
+    }
+  }
+}
+
 @layer components {
   .app-layout {
     display: flex;
@@ -31,13 +56,8 @@
     font-size: 1.3rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    color: var(--color-text);
     text-decoration: none;
     transition: color var(--transition-fast);
-
-    &:hover {
-      color: var(--color-accent);
-    }
   }
 
   .nav-links {
@@ -46,22 +66,12 @@
 
     & a {
       font-family: var(--font-body);
-      color: var(--color-text-secondary);
       text-decoration: none;
       font-weight: 600;
       font-size: 0.95rem;
       padding-block-end: 0.25rem;
       border-block-end: 2px solid transparent;
       transition: all var(--transition-fast);
-
-      &:hover {
-        color: var(--color-text);
-      }
-
-      &.active {
-        color: var(--color-accent);
-        border-block-end-color: var(--color-accent);
-      }
     }
 
     @media (max-width: 640px) {

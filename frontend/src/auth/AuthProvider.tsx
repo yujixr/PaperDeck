@@ -1,6 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { ApiError, api, type User } from "../api";
-import { JWT_STORAGE_KEY } from "../lib/apiConfig";
+import { ApiError, api, clearToken, setToken, type User } from "../api";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -20,7 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     api.logout().catch(() => {});
-    localStorage.removeItem(JWT_STORAGE_KEY);
+    clearToken();
     setIsAuthenticated(false);
     setUser(null);
   }, []);
@@ -29,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (username: string, password: string) => {
       try {
         const tokenData = await api.login(username, password);
-        localStorage.setItem(JWT_STORAGE_KEY, tokenData.token);
+        setToken(tokenData.token);
         const userInfo = await api.getMe();
         setIsAuthenticated(true);
         setUser(userInfo);
@@ -48,22 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return api.register(username, password);
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const token = localStorage.getItem(JWT_STORAGE_KEY);
-      if (token) {
-        try {
-          const userInfo = await api.getMe();
-          setIsAuthenticated(true);
-          setUser(userInfo);
-        } catch {
-          logout();
-        }
+      try {
+        const userInfo = await api.getMe();
+        setIsAuthenticated(true);
+        setUser(userInfo);
+      } catch {
+        clearToken();
       }
       setIsLoading(false);
     };
     checkAuthStatus();
-  }, [logout]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, register, logout, isLoading }}>
