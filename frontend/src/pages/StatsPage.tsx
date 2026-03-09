@@ -158,7 +158,10 @@ function PaperItem({ paper, index }: { paper: ReadPaper; index: number }) {
     }
   };
 
-  const open = () => dialogRef.current?.showModal();
+  const open = () => {
+    dialogRef.current?.showModal();
+    dialogRef.current?.focus();
+  };
   const close = () => dialogRef.current?.close();
 
   return (

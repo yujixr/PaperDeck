@@ -60,4 +60,17 @@
     --transition-base: var(--duration-base) ease;
     --transition-slow: var(--duration-slow) var(--easing-gentle);
   }
+
+  :root,
+  [data-fontsize="small"] {
+    --card-font-scale: 1;
+  }
+
+  [data-fontsize="medium"] {
+    --card-font-scale: 1.125;
+  }
+
+  [data-fontsize="large"] {
+    --card-font-scale: 1.25;
+  }
 }

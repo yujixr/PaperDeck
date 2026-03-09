@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { api, type Conference } from "../api";
 import { useAuth } from "../auth/AuthProvider";
 import { type ConferenceFilter, useConferenceFilter } from "../context/ConferenceFilterContext";
+import { applyFontSize, type FontSize, loadFontSize, saveFontSize } from "../lib/fontsize";
 import { Button } from "./Button";
 import "./SettingsDialog.css";
 
@@ -17,6 +18,7 @@ export function SettingsDialog({
   const { user, logout } = useAuth();
   const { filter, setFilter } = useConferenceFilter();
   const [localFilter, setLocalFilter] = useState<ConferenceFilter | null>(filter);
+  const [fontSize, setFontSize] = useState<FontSize>(loadFontSize);
 
   const { data: conferences } = useQuery({
     queryKey: ["conferences"],
@@ -26,11 +28,18 @@ export function SettingsDialog({
   const open = () => {
     setLocalFilter(filter);
     dialogRef.current?.showModal();
+    dialogRef.current?.focus();
   };
   const close = () => {
     setFilter(localFilter);
     dialogRef.current?.close();
     onCloseProp?.();
+  };
+
+  const handleFontSizeChange = (size: FontSize) => {
+    setFontSize(size);
+    saveFontSize(size);
+    applyFontSize(size);
   };
 
   const handleFilterChange = (value: string) => {
@@ -95,6 +104,25 @@ export function SettingsDialog({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="settings-section">
+            <span className="settings-label">文字サイズ</span>
+            <div className="font-size-control" role="radiogroup" aria-label="文字サイズ">
+              {(["small", "medium", "large"] as const).map((size) => (
+                // biome-ignore lint/a11y/useSemanticElements: segmented control using buttons with radio role
+                <button
+                  key={size}
+                  type="button"
+                  role="radio"
+                  aria-checked={fontSize === size}
+                  className={`font-size-option${fontSize === size ? " active" : ""}`}
+                  onClick={() => handleFontSizeChange(size)}
+                >
+                  {{ small: "小", medium: "中", large: "大" }[size]}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="settings-section settings-logout">

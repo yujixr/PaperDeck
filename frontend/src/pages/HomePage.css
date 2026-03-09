@@ -16,18 +16,22 @@
     }
 
     & .conference {
-      font-size: 0.8rem;
+      font-size: calc(0.8rem * var(--card-font-scale));
     }
 
     & h3 {
-      font-size: 1.5rem;
+      font-size: calc(1.5rem * var(--card-font-scale));
+    }
+
+    & details summary {
+      font-size: calc(0.9rem * var(--card-font-scale));
     }
 
     & .abstract {
       padding-block: 1rem;
       padding-inline: 1.25rem;
       line-height: 1.75;
-      font-size: 0.95rem;
+      font-size: calc(0.95rem * var(--card-font-scale));
     }
 
     &:lang(ja) .abstract {
@@ -44,13 +48,13 @@
       margin-block: 0.75rem;
 
       & h3 {
-        font-size: 1.25rem;
+        font-size: calc(1.25rem * var(--card-font-scale));
       }
 
       & .abstract {
         padding-block: 0.75rem;
         padding-inline: 1rem;
-        font-size: 0.9rem;
+        font-size: calc(0.9rem * var(--card-font-scale));
       }
     }
   }

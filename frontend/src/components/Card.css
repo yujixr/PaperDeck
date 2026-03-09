@@ -41,10 +41,10 @@
         color: var(--color-text-muted);
         font-size: 0.9rem;
         transition: color var(--transition-fast);
+      }
 
-        &:hover {
-          color: var(--color-text);
-        }
+      &:is([open], :hover) > summary {
+        color: var(--color-text-secondary);
       }
     }
   }

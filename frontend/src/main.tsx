@@ -8,10 +8,13 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import App from "./App.tsx";
 import { ApiError } from "./api.ts";
+import { applyFontSize, loadFontSize } from "./lib/fontsize.ts";
 
 import "./main.css";
 import "./styles/animations.css";
 import "./styles/tokens.css";
+
+applyFontSize(loadFontSize());
 
 const queryClient = new QueryClient({
   defaultOptions: {
