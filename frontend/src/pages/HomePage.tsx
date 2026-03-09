@@ -32,6 +32,7 @@ export function HomePage() {
     await Promise.all([waitForAnimation, apiCall]);
 
     advance();
+    window.scrollTo(0, 0);
     setExiting(false);
   };
 
