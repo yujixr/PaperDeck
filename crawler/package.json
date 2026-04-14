@@ -8,12 +8,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "cheerio": "^1",
-    "commander": "^14"
+    "cheerio": "^1.2.0",
+    "commander": "^14.0.3"
   },
   "devDependencies": {
-    "tsx": "^4",
-    "typescript": "^5",
-    "vitest": "^3"
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   }
 }

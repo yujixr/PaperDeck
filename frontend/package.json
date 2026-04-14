@@ -12,24 +12,24 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@tanstack/query-async-storage-persister": "^5.90.24",
-    "@tanstack/react-query": "^5.90.5",
-    "@tanstack/react-query-persist-client": "^5.90.24",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "@tanstack/query-async-storage-persister": "^5.99.0",
+    "@tanstack/react-query": "^5.99.0",
+    "@tanstack/react-query-persist-client": "^5.99.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-masonry-css": "^1.0.16",
-    "react-router": "^7.9.4"
+    "react-router": "^7.14.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
-    "@types/node": "^25.0.0",
-    "@types/react": "^19.1.16",
-    "@types/react-dom": "^19.1.9",
-    "@vitejs/plugin-react": "^5.0.4",
-    "happy-dom": "^20.8.3",
-    "typescript": "~5.9.3",
-    "vite": "^7.1.7",
-    "vitest": "^3.2.4"
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "happy-dom": "^20.9.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.8",
+    "vitest": "^4.1.4"
   }
 }
