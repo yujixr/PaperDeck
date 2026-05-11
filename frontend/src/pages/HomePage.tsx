@@ -23,15 +23,16 @@ export function HomePage() {
   const dismissPaper = async (action: "like" | "read") => {
     if (!paper || exiting) return;
     setExiting(true);
+    const dismissedId = paper.id;
 
     const waitForAnimation = new Promise<void>((resolve) => {
       animationResolve.current = resolve;
     });
-    const apiCall = action === "like" ? like(paper.id) : markAsRead(paper.id);
+    const apiCall = action === "like" ? like(dismissedId) : markAsRead(dismissedId);
 
     await Promise.all([waitForAnimation, apiCall]);
 
-    advance();
+    advance(dismissedId);
     window.scrollTo(0, 0);
     setExiting(false);
   };

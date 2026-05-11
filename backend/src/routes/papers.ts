@@ -18,6 +18,21 @@ function parsePaperId(raw: string): number | null {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+const MAX_EXCLUDE_IDS = 50;
+
+function parseExcludeIds(raw: string | undefined): number[] | "invalid" {
+  if (!raw) return [];
+  const parts = raw.split(",");
+  if (parts.length > MAX_EXCLUDE_IDS) return "invalid";
+  const ids: number[] = [];
+  for (const p of parts) {
+    const id = parsePaperId(p);
+    if (id === null) return "invalid";
+    ids.push(id);
+  }
+  return ids;
+}
+
 // GET /papers/conferences
 papers.get("/conferences", async (c) => {
   const { results } = await c.env.DB.prepare(
@@ -34,6 +49,8 @@ papers.get("/next", async (c) => {
   const userId = c.get("userId");
   const conference = c.req.query("conference");
   const yearStr = c.req.query("year");
+  const excludeIds = parseExcludeIds(c.req.query("exclude_ids"));
+  if (excludeIds === "invalid") return c.text("Invalid exclude_ids parameter", 400);
 
   let sql = `
     SELECT p.*
@@ -53,6 +70,10 @@ papers.get("/next", async (c) => {
     if (!Number.isFinite(year)) return c.text("Invalid year parameter", 400);
     sql += " AND p.year = ?";
     params.push(year);
+  }
+  if (excludeIds.length > 0) {
+    sql += ` AND p.id NOT IN (${excludeIds.map(() => "?").join(",")})`;
+    params.push(...excludeIds);
   }
   sql += " ORDER BY RANDOM() LIMIT 1";
 

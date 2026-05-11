@@ -128,8 +128,13 @@ export const api = {
   getConferences() {
     return fetchJson<Conference[]>("GET", "/api/papers/conferences");
   },
-  getNextPaper(params?: { conference?: string; year?: string }) {
-    return fetchJson<Paper>("GET", "/api/papers/next", undefined, params);
+  getNextPaper(params?: { conference?: string; year?: string; exclude_ids?: number[] }) {
+    const query: Record<string, string | undefined> = {
+      conference: params?.conference,
+      year: params?.year,
+      exclude_ids: params?.exclude_ids?.length ? params.exclude_ids.join(",") : undefined,
+    };
+    return fetchJson<Paper>("GET", "/api/papers/next", undefined, query);
   },
   getLikedPapers() {
     return fetchJson<Paper[]>("GET", "/api/papers/liked");

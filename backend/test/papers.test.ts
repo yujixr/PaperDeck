@@ -82,6 +82,81 @@ describe("Papers API", () => {
     expect(paper.year).toBe(2024);
   });
 
+  it("GET /api/papers/next?exclude_ids=... — never returns an excluded id", async () => {
+    // Fetch any candidate, then exclude its id and ensure the next call returns a different paper.
+    const first = await SELF.fetch("http://localhost/api/papers/next", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(first.status).toBe(200);
+    const firstPaper = (await first.json()) as { id: number };
+
+    // Repeat several times — RANDOM() means without exclude we might coincidentally get a
+    // different paper; with exclude we must never get the same one.
+    for (let i = 0; i < 10; i++) {
+      const res = await SELF.fetch(
+        `http://localhost/api/papers/next?exclude_ids=${firstPaper.id}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      expect(res.status).toBe(200);
+      const paper = (await res.json()) as { id: number };
+      expect(paper.id).not.toBe(firstPaper.id);
+    }
+  });
+
+  it("GET /api/papers/next?exclude_ids=a,b — excludes multiple ids", async () => {
+    // Discover two distinct candidate ids first.
+    const seen = new Set<number>();
+    for (let i = 0; i < 20 && seen.size < 2; i++) {
+      const res = await SELF.fetch("http://localhost/api/papers/next", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 200) {
+        const p = (await res.json()) as { id: number };
+        seen.add(p.id);
+      }
+    }
+    expect(seen.size).toBeGreaterThanOrEqual(2);
+    const [a, b] = [...seen];
+
+    for (let i = 0; i < 10; i++) {
+      const res = await SELF.fetch(`http://localhost/api/papers/next?exclude_ids=${a},${b}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      expect(res.status).toBe(200);
+      const paper = (await res.json()) as { id: number };
+      expect(paper.id).not.toBe(a);
+      expect(paper.id).not.toBe(b);
+    }
+  });
+
+  it("GET /api/papers/next?exclude_ids=... — returns 404 when all remaining are excluded", async () => {
+    // Use a fresh user so no prior reads affect this test.
+    const hash = await hashPassword("excludepass");
+    await env.DB.prepare("INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)")
+      .bind("excludeuser", hash)
+      .run();
+    const user = await env.DB.prepare("SELECT user_id FROM users WHERE username = ?")
+      .bind("excludeuser")
+      .first<{ user_id: number }>();
+    if (!user) throw new Error("User not found");
+    const excToken = await createJwt(user.user_id, "test-secret-key-for-development-only");
+
+    const ids = await env.DB.prepare("SELECT id FROM papers").all<{ id: number }>();
+    const allIds = ids.results.map((r) => r.id).join(",");
+
+    const res = await SELF.fetch(`http://localhost/api/papers/next?exclude_ids=${allIds}`, {
+      headers: { Authorization: `Bearer ${excToken}` },
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("GET /api/papers/next?exclude_ids=not-a-number — returns 400", async () => {
+    const res = await SELF.fetch("http://localhost/api/papers/next?exclude_ids=1,abc,3", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("POST /api/papers/1/like — creates a like", async () => {
     const res = await SELF.fetch("http://localhost/api/papers/1/like", {
       method: "POST",
